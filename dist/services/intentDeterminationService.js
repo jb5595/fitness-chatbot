@@ -1,7 +1,8 @@
-import { OpenAIService } from "./openAIService.js";
+import { OpenAIChatService } from "./openAIChatService.js";
 export class IntentDeterminationService {
     static async determineIntent(customerMessage) {
-        const response = await OpenAIService.call([this.INTENT_PROMPT], [customerMessage]);
+        const chatService = new OpenAIChatService();
+        const response = await chatService.chat([this.INTENT_PROMPT], [customerMessage]);
         return response?.trim();
     }
 }

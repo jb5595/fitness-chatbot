@@ -115,6 +115,31 @@
         "question": "Hello",
         "answer": "Hi there! How can I assist you today?",
         "timestamp": 1742669698591
+      },
+      {
+        "question": "Hi there",
+        "answer": "Hello! How can I assist you today?",
+        "timestamp": 1742671753567
+      },
+      {
+        "question": "I feel like I may have already asked you this but do you guys have sparring",
+        "answer": "Yes, we do offer sparring at Topeira Boxing Club. Just ensure you're registered with USA Boxing and have a passbook, mouthpiece, and headgear. Looking forward to seeing you in the ring!",
+        "timestamp": 1742671780132
+      },
+      {
+        "question": "Is this the first time I’ve asked you this?",
+        "answer": "Based on our previous interactions, yes, this is the first time you're asking this. How may I assist you further?",
+        "timestamp": 1742671798908
+      },
+      {
+        "question": "What did I just ask you",
+        "answer": "You just asked if this was the first time you're asking about whether we have sparring sessions at Topeira Boxing Club.",
+        "timestamp": 1742671820057
+      },
+      {
+        "question": "Hello",
+        "answer": "Hi there! How can I assist you today?",
+        "timestamp": 1742672530417
       }
     ]
   },
