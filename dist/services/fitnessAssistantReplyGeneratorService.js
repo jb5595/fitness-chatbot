@@ -1,7 +1,8 @@
 import { IntentDeterminationService } from "./intentDeterminationService.js";
 import { ScrapingService } from "./scrapingService.js";
 import { OpenAIChatService } from "./openAIChatService.js";
-import { addCustomerInteraction } from "../database/db.js";
+import { addChatInteraction } from "../database/db.js";
+import { ContextGeneratorService } from "./GymProfileContextGeneratorService.js";
 export class FitnessAssistantReplyGeneratorService {
     constructor(config) {
         this.config = {
@@ -11,19 +12,24 @@ export class FitnessAssistantReplyGeneratorService {
                 "https://topeiraboxing.com/faq/"
             ],
             systemPrompt: config?.systemPrompt ||
-                "You're a fitness coach's assistant. Answer questions about rates, availability, and suggest workouts. Keep it short."
+                "You're a fitness coach's assistant. Answer questions about rates, availability, and suggest workouts. Keep it short.",
+            gymProfile: config?.gymProfile
         };
         this.chatService = new OpenAIChatService();
-        // Pre-fetch website content on initialization
         this.scrapedContentPromise = ScrapingService.scrapeUrls(this.config.websiteUrls);
     }
     async getSystemPrompt() {
-        const additionalContext = await this.scrapedContentPromise;
-        return `${this.config.systemPrompt}\nAdditional context from the fitness website: ${additionalContext}`;
+        const contexts = [
+            this.config.systemPrompt,
+            ContextGeneratorService.generateContextFromGymProfile(this.config.gymProfile),
+            `Additional context from the fitness website: ${await this.scrapedContentPromise}`
+        ];
+        return ContextGeneratorService.combineContexts(contexts);
     }
     async generateBookingReply(userInput, fromNumber) {
-        const response = `Let's get you scheduled! Book here: ${this.config.calendlyLink}`;
-        await this.logInteraction(fromNumber, userInput, `Sent booking link: ${this.config.calendlyLink}`);
+        const bookingLink = this.config.calendlyLink;
+        const response = `Let's get you scheduled! Book here: ${bookingLink}`;
+        await this.logInteraction(fromNumber, userInput, `Sent booking link: ${bookingLink}`);
         return response;
     }
     async generateChatReply(userInput, fromNumber) {
@@ -33,7 +39,7 @@ export class FitnessAssistantReplyGeneratorService {
         return response || '';
     }
     async logInteraction(fromNumber, userInput, response) {
-        await addCustomerInteraction(fromNumber, userInput, response);
+        await addChatInteraction(fromNumber, userInput, response);
     }
     async generateReply(userInput, fromNumber) {
         try {
@@ -42,6 +48,7 @@ export class FitnessAssistantReplyGeneratorService {
             const response = intent === "booking"
                 ? await this.generateBookingReply(userInput, fromNumber)
                 : await this.generateChatReply(userInput, fromNumber);
+            console.log("generated response");
             return response;
         }
         catch (error) {

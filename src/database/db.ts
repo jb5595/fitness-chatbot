@@ -1,71 +1,143 @@
 import { JSONFilePreset } from "lowdb/node";
 import { Low } from "lowdb";
 
-interface CustomerInteraction {
-    question: string;
-    answer: string;
+// Type definitions for better organization
+interface ChatInteraction {
+    userMessage: string;
+    assistantResponse: string;
     timestamp: number;
 }
 
-interface DatabaseSchema {
-    customers: {
-        [userId: string]: CustomerInteraction[];
-    };
-    messages: Record<string, unknown>;
+interface GymProfile {
+    name: string;
+    description?: string;
+    scheduleInfo?: string;
+    pricing: string;
+    websiteData?: {[url: string]: string};
+    additionalInfo: string[]
+    lastUpdated: number;
 }
+
+interface DatabaseSchema {
+    chatHistory: {
+        [userId: string]: ChatInteraction[];
+    };
+    gymProfiles: {
+        [gymId: string]: GymProfile;
+    };
+}
+
+// ... existing code ...
 
 let db: Low<DatabaseSchema>;
 
 async function setupDatabase(): Promise<Low<DatabaseSchema>> {
-    db = await JSONFilePreset('db.json', { customers: {}, messages: {} });
+    db = await JSONFilePreset('db.json', { 
+        chatHistory: {}, 
+        gymProfiles: {} 
+    });
 
-    // Read the file first
     await db.read();
 
-    // If db.data is undefined or null (file doesn't exist or is empty), set default
     if (!db.data) {
-        db.data = { customers: {}, messages: {} };
-        await db.write(); // Persist the default data to the file
+        db.data = { 
+            chatHistory: {}, 
+            gymProfiles: {} 
+        };
+        await db.write();
     }
     console.log("Database initialized");
     return db;
 }
 
-async function getCustomerHistory(userId: string): Promise<CustomerInteraction[]> {
-    await db.read();
-    return db.data.customers[userId] || [];
-}
-
-async function addCustomerInteraction(
-    userId: string, 
-    question: string, 
-    answer: string
+// Gym Profile Management
+async function updateGymProfile(
+    gymId: string,
+    profileData: Partial<GymProfile>
 ): Promise<void> {
     await db.read();
     
-    // Initialize customer array if it doesn't exist
-    db.data.customers[userId] = db.data.customers[userId] || [];
+    const existingProfile = db.data.gymProfiles[gymId] || {
+        name: '',
+        lastUpdated: 0
+    };
+
+    db.data.gymProfiles[gymId] = {
+        ...existingProfile,
+        ...profileData,
+        lastUpdated: Date.now()
+    };
+
+    return db.write();
+}
+
+async function getGymProfile(gymId: string): Promise<GymProfile> {
+    await db.read();
+    return db.data.gymProfiles[gymId] || null;
+}
+
+
+// Chat History Management
+async function getChatHistory(userId: string): Promise<ChatInteraction[]> {
+    await db.read();
+
+    // Ensure chatHistory object exists
+    if (!db.data.chatHistory) {
+        db.data.chatHistory = {};
+    }
     
-    // Add new interaction
-    db.data.customers[userId].push({
-        question,
-        answer,
+    // Ensure user's chat history array exists
+    if (!db.data.chatHistory[userId]) {
+        db.data.chatHistory[userId] = [];
+    }
+
+    return db.data?.chatHistory[userId] || [];
+}
+
+async function addChatInteraction(
+    userId: string, 
+    userMessage: string, 
+    assistantResponse: string
+): Promise<void> {
+    await db.read();
+
+        
+    // Ensure chatHistory object exists
+    if (!db.data.chatHistory) {
+        db.data.chatHistory = {};
+    }
+    
+    // Ensure user's chat history array exists
+    if (!db.data.chatHistory[userId]) {
+        db.data.chatHistory[userId] = [];
+    }
+    
+    db.data.chatHistory[userId].push({
+        userMessage,
+        assistantResponse,
         timestamp: Date.now(),
     });
     
     return db.write();
 }
 
-async function getFormattedCustomerHistory(userId: string): Promise<string> {
-    const history = await getCustomerHistory(userId);
+async function getFormattedChatHistory(userId: string): Promise<string> {
+    const history = await getChatHistory(userId);
     return history
-        .map((entry) => `Q: ${entry.question}\nA: ${entry.answer}`)
+        .map((entry) => `Q: ${entry.userMessage}\nA: ${entry.assistantResponse}`)
         .join("\n");
 }
 
 export {
     setupDatabase,
-    getCustomerHistory,
-    addCustomerInteraction,
-    getFormattedCustomerHistory
+    // Gym Profile exports
+    updateGymProfile,
+    getGymProfile,
+    // Chat History exports
+    getChatHistory,
+    addChatInteraction,
+    getFormattedChatHistory,
+    // Type exports
+    type GymProfile,
+    type ChatInteraction
 };

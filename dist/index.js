@@ -1,7 +1,7 @@
 import express from "express";
 import { OpenAI } from "openai";
 import twilio from "twilio";
-import { setupDatabase } from './database/db.js';
+import { getGymProfile, setupDatabase } from './database/db.js';
 import dotenv from "dotenv";
 import { FitnessAssistantReplyGeneratorService } from "./services/fitnessAssistantReplyGeneratorService.js";
 dotenv.config();
@@ -13,10 +13,16 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 app.post("/sms", async (req, res) => {
     const userInput = req.body.Body;
     const fromNumber = req.body.From;
+    const toNumber = req.body.To.replace(/\D/g, '');
+    const gymProfile = await getGymProfile(toNumber);
     console.log("body", req.body);
     console.log("userInput", userInput);
-    const replyGenerator = new FitnessAssistantReplyGeneratorService();
+    console.log("toNumber", toNumber);
+    const replyGenerator = new FitnessAssistantReplyGeneratorService({
+        gymProfile: gymProfile
+    });
     const response = await replyGenerator.generateReply(userInput, fromNumber);
+    console.log("sending response via twillio");
     const twiml = new twilio.twiml.MessagingResponse();
     twiml.message(response);
     res.type("text/xml");

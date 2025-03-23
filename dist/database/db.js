@@ -1,37 +1,78 @@
 import { JSONFilePreset } from "lowdb/node";
+// ... existing code ...
 let db;
 async function setupDatabase() {
-    db = await JSONFilePreset('db.json', { customers: {}, messages: {} });
-    // Read the file first
+    db = await JSONFilePreset('db.json', {
+        chatHistory: {},
+        gymProfiles: {}
+    });
     await db.read();
-    // If db.data is undefined or null (file doesn't exist or is empty), set default
     if (!db.data) {
-        db.data = { customers: {}, messages: {} };
-        await db.write(); // Persist the default data to the file
+        db.data = {
+            chatHistory: {},
+            gymProfiles: {}
+        };
+        await db.write();
     }
     console.log("Database initialized");
     return db;
 }
-async function getCustomerHistory(userId) {
+// Gym Profile Management
+async function updateGymProfile(gymId, profileData) {
     await db.read();
-    return db.data.customers[userId] || [];
+    const existingProfile = db.data.gymProfiles[gymId] || {
+        name: '',
+        lastUpdated: 0
+    };
+    db.data.gymProfiles[gymId] = {
+        ...existingProfile,
+        ...profileData,
+        lastUpdated: Date.now()
+    };
+    return db.write();
 }
-async function addCustomerInteraction(userId, question, answer) {
+async function getGymProfile(gymId) {
     await db.read();
-    // Initialize customer array if it doesn't exist
-    db.data.customers[userId] = db.data.customers[userId] || [];
-    // Add new interaction
-    db.data.customers[userId].push({
-        question,
-        answer,
+    return db.data.gymProfiles[gymId] || null;
+}
+// Chat History Management
+async function getChatHistory(userId) {
+    await db.read();
+    // Ensure chatHistory object exists
+    if (!db.data.chatHistory) {
+        db.data.chatHistory = {};
+    }
+    // Ensure user's chat history array exists
+    if (!db.data.chatHistory[userId]) {
+        db.data.chatHistory[userId] = [];
+    }
+    return db.data?.chatHistory[userId] || [];
+}
+async function addChatInteraction(userId, userMessage, assistantResponse) {
+    await db.read();
+    // Ensure chatHistory object exists
+    if (!db.data.chatHistory) {
+        db.data.chatHistory = {};
+    }
+    // Ensure user's chat history array exists
+    if (!db.data.chatHistory[userId]) {
+        db.data.chatHistory[userId] = [];
+    }
+    db.data.chatHistory[userId].push({
+        userMessage,
+        assistantResponse,
         timestamp: Date.now(),
     });
     return db.write();
 }
-async function getFormattedCustomerHistory(userId) {
-    const history = await getCustomerHistory(userId);
+async function getFormattedChatHistory(userId) {
+    const history = await getChatHistory(userId);
     return history
-        .map((entry) => `Q: ${entry.question}\nA: ${entry.answer}`)
+        .map((entry) => `Q: ${entry.userMessage}\nA: ${entry.assistantResponse}`)
         .join("\n");
 }
-export { setupDatabase, getCustomerHistory, addCustomerInteraction, getFormattedCustomerHistory };
+export { setupDatabase, 
+// Gym Profile exports
+updateGymProfile, getGymProfile, 
+// Chat History exports
+getChatHistory, addChatInteraction, getFormattedChatHistory };

@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 import dotenv from "dotenv";
-import { addCustomerInteraction, getFormattedCustomerHistory } from "../database/db.js";
+import { addChatInteraction, getFormattedChatHistory } from "../database/db.js";
 
 dotenv.config();
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -17,11 +17,11 @@ export class OpenAIChatService {
     }
 
     async chatWithHistory(customerIdentifier: string, systemPrompts: string[], userPrompts: string[]) {
-        const customerHistory = await getFormattedCustomerHistory(customerIdentifier);
+        const customerHistory = await getFormattedChatHistory(customerIdentifier);
         const customerHistoryAsPrompt = OpenAIChatService.CUSTOMER_HISTORY_PROMPT + `\n${customerHistory}\n`;
         const response = await this.chat(systemPrompts, [customerHistoryAsPrompt, ...userPrompts]);
 
-        await addCustomerInteraction(customerIdentifier, userPrompts[0], response || '');
+        await addChatInteraction(customerIdentifier, userPrompts[0], response || '');
         return response;
     }
 

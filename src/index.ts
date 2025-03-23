@@ -1,11 +1,8 @@
 import express, { Request, Response } from "express";
 import { OpenAI } from "openai";
 import twilio from "twilio";
-import { setupDatabase, addCustomerInteraction, getFormattedCustomerHistory } from './database/db.js';
-import { IntentDeterminationService } from "./services/intentDeterminationService.js";
+import { getGymProfile, setupDatabase } from './database/db.js';
 import dotenv from "dotenv";
-import { ScrapingService } from "./services/scrapingService.js";
-import { OpenAIChatService } from "./services/openAIChatService.js";
 import { FitnessAssistantReplyGeneratorService } from "./services/fitnessAssistantReplyGeneratorService.js";
 
 dotenv.config();
@@ -23,18 +20,23 @@ interface TwilioRequest extends Request {
     body: {
         Body: string;
         From: string;
+        To: string
     }
 }
 
 app.post("/sms", async (req: TwilioRequest, res: Response) => {
     const userInput = req.body.Body;
     const fromNumber = req.body.From;
+    const toNumber = req.body.To.replace(/\D/g, '');
+    const gymProfile = await getGymProfile(toNumber)
     console.log("body", req.body);
     console.log("userInput", userInput);
-
-    const replyGenerator = new FitnessAssistantReplyGeneratorService();
+    console.log("toNumber", toNumber)
+    const replyGenerator = new FitnessAssistantReplyGeneratorService({
+        gymProfile:gymProfile
+    });
     const response = await replyGenerator.generateReply(userInput, fromNumber);
-
+    console.log("sending response via twillio")
     const twiml = new twilio.twiml.MessagingResponse();
     twiml.message(response);
     res.type("text/xml");
