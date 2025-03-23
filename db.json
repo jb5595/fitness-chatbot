@@ -140,6 +140,16 @@
         "question": "Hello",
         "answer": "Hi there! How can I assist you today?",
         "timestamp": 1742672530417
+      },
+      {
+        "question": "Hi",
+        "answer": "Hello! How can I assist you today?",
+        "timestamp": 1742688107461
+      },
+      {
+        "question": "Hi",
+        "answer": "Hello! How can I assist you today?",
+        "timestamp": 1742688107462
       }
     ]
   },
