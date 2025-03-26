@@ -1,78 +1,41 @@
-import { JSONFilePreset } from "lowdb/node";
-// ... existing code ...
-let db;
+import { MongoClient, ServerApiVersion } from 'mongodb';
+import dotenv from 'dotenv';
+dotenv.config();
+// MongoDB setup
+const uri = process.env.MONGODB_URI;
+const client = new MongoClient(uri, {
+    serverApi: {
+        version: ServerApiVersion.v1,
+        strict: true,
+        deprecationErrors: true,
+    }
+});
+const DB_NAME = 'fitness-chatbot'; // Updated database name
+let isConnected = false;
+async function connectToDatabase() {
+    if (!isConnected) {
+        await client.connect();
+        isConnected = true;
+        console.log("Connected to MongoDB");
+    }
+}
 async function setupDatabase() {
-    db = await JSONFilePreset('db.json', {
-        chatHistory: {},
-        gymProfiles: {}
-    });
-    await db.read();
-    if (!db.data) {
-        db.data = {
-            chatHistory: {},
-            gymProfiles: {}
-        };
-        await db.write();
+    try {
+        await connectToDatabase();
+        await client.db(DB_NAME).command({ ping: 1 });
+        console.log("Database initialized successfully");
     }
-    console.log("Database initialized");
-    return db;
-}
-// Gym Profile Management
-async function updateGymProfile(gymId, profileData) {
-    await db.read();
-    const existingProfile = db.data.gymProfiles[gymId] || {
-        name: '',
-        lastUpdated: 0
-    };
-    db.data.gymProfiles[gymId] = {
-        ...existingProfile,
-        ...profileData,
-        lastUpdated: Date.now()
-    };
-    return db.write();
-}
-async function getGymProfile(gymId) {
-    await db.read();
-    return db.data.gymProfiles[gymId] || null;
-}
-// Chat History Management
-async function getChatHistory(userId) {
-    await db.read();
-    // Ensure chatHistory object exists
-    if (!db.data.chatHistory) {
-        db.data.chatHistory = {};
+    catch (error) {
+        console.error("Failed to initialize database:", error);
+        throw error;
     }
-    // Ensure user's chat history array exists
-    if (!db.data.chatHistory[userId]) {
-        db.data.chatHistory[userId] = [];
-    }
-    return db.data?.chatHistory[userId] || [];
 }
-async function addChatInteraction(userId, userMessage, assistantResponse) {
-    await db.read();
-    // Ensure chatHistory object exists
-    if (!db.data.chatHistory) {
-        db.data.chatHistory = {};
+// Cleanup function
+async function closeDatabase() {
+    if (isConnected) {
+        await client.close();
+        isConnected = false;
+        console.log("Disconnected from MongoDB");
     }
-    // Ensure user's chat history array exists
-    if (!db.data.chatHistory[userId]) {
-        db.data.chatHistory[userId] = [];
-    }
-    db.data.chatHistory[userId].push({
-        userMessage,
-        assistantResponse,
-        timestamp: Date.now(),
-    });
-    return db.write();
 }
-async function getFormattedChatHistory(userId) {
-    const history = await getChatHistory(userId);
-    return history
-        .map((entry) => `Q: ${entry.userMessage}\nA: ${entry.assistantResponse}`)
-        .join("\n");
-}
-export { setupDatabase, 
-// Gym Profile exports
-updateGymProfile, getGymProfile, 
-// Chat History exports
-getChatHistory, addChatInteraction, getFormattedChatHistory };
+export { setupDatabase, closeDatabase, connectToDatabase, DB_NAME, client, };

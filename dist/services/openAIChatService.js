@@ -1,8 +1,7 @@
 import OpenAI from "openai";
 import dotenv from "dotenv";
-import { addChatInteraction, getFormattedChatHistory } from "../database/db.js";
+import { addChatInteraction, getFormattedChatHistory } from "../database/helpers/chatHistory.js";
 dotenv.config();
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 export class OpenAIChatService {
     constructor(apiKey = process.env.OPENAI_API_KEY || '') {
         this.openai = new OpenAI({ apiKey });

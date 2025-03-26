@@ -1,4 +1,4 @@
-import { GymProfile } from "../database/db.js";
+import { GymProfile } from "../database/helpers/gymProfile.js";
 
 export class ContextGeneratorService {
     static generateContextFromGymProfile(profile?: GymProfile ): string {

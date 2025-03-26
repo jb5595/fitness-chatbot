@@ -1,8 +1,9 @@
 import { IntentDeterminationService } from "./intentDeterminationService.js";
 import { ScrapingService } from "./scrapingService.js";
 import { OpenAIChatService } from "./openAIChatService.js";
-import { addChatInteraction, GymProfile } from "../database/db.js";
 import { ContextGeneratorService } from "./GymProfileContextGeneratorService.js";
+import { GymProfile } from "../database/helpers/gymProfile.js";
+import { addChatInteraction } from "../database/helpers/chatHistory.js";
 
 interface AssistantConfig {
     calendlyLink: string;
@@ -56,8 +57,6 @@ export class FitnessAssistantReplyGeneratorService {
             [systemPrompt],
             [userInput]
         );
-        await this.logInteraction(fromNumber, userInput, response || '');
-
         return response || '';
     }
 

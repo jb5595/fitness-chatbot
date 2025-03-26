@@ -1,8 +1,8 @@
 import { IntentDeterminationService } from "./intentDeterminationService.js";
 import { ScrapingService } from "./scrapingService.js";
 import { OpenAIChatService } from "./openAIChatService.js";
-import { addChatInteraction } from "../database/db.js";
 import { ContextGeneratorService } from "./GymProfileContextGeneratorService.js";
+import { addChatInteraction } from "../database/helpers/chatHistory.js";
 export class FitnessAssistantReplyGeneratorService {
     constructor(config) {
         this.config = {
@@ -35,7 +35,6 @@ export class FitnessAssistantReplyGeneratorService {
     async generateChatReply(userInput, fromNumber) {
         const systemPrompt = await this.getSystemPrompt();
         const response = await this.chatService.chatWithHistory(fromNumber, [systemPrompt], [userInput]);
-        await this.logInteraction(fromNumber, userInput, response || '');
         return response || '';
     }
     async logInteraction(fromNumber, userInput, response) {
