@@ -70,10 +70,11 @@ app.post("/voice", (req, res) => {
     const userId = req.body.From;
     const digit = req.body.Digits;
     const toNumber = req.body.To.replace(/\D/g, '');
+    console.log(`in voice response fromNumber ${userId}, to number: ${toNumber}, Digit ${digit}`)
     const voiceService = new VoiceResponseService({
         twilioNumber: toNumber,
     });
-    const twimlResponse = await voiceService.generateVoiceResponse(userId, digit);
+    const twimlResponse = await voiceService.generateVoiceResponse(userId, digit, toNumber);
 
     res.type("text/xml");
     res.send(twimlResponse);
