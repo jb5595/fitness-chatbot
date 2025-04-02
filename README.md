@@ -1,10 +1,10 @@
 Running locally instructions.
 
-##Build App
+## Build App
 npm run build
-##Start app
+## Start app
 npm start
-##Expose public endpoint
+## Expose public endpoint
 ngrok http 3000
 <img width="1037" alt="Screenshot 2025-03-26 at 2 22 41 PM" src="https://github.com/user-attachments/assets/8ebe3b42-44cc-439f-ae12-b2df95cbce19" />
 
