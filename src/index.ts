@@ -6,12 +6,19 @@ import { FitnessAssistantReplyGeneratorService } from "./services/fitnessAssista
 import { getGymProfileByPhoneNumber } from "./database/helpers/gymProfile.js";
 import VoiceResponse from "twilio/lib/twiml/VoiceResponse.js";
 import { VoiceResponseService } from "./services/callResponseService.js";
+import path from "path"; // Add this import
+
 
 dotenv.config();
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+const publicPath = path.resolve(__dirname, "..", "public");
+app.use(express.static(publicPath));
+
+// Debug log
 
 interface TwilioRequest extends Request {
     body: {
@@ -80,10 +87,20 @@ app.post("/voice", (req, res) => {
     res.send(twimlResponse);
   });
 
+app.get("/", (req: Request, res: Response) => {
+    res.sendFile(path.join(publicPath, "index.html"), (err) => {
+        if (err) {
+        console.error("Error serving index.html:", err);
+        res.status(500).send("Error serving the page");
+      }
+    });
+  });
 // Start the app with database setup
 async function startApp(): Promise<void> {
     try {
         await setupDatabase();
+        console.log("Serving static files from:", publicPath);
+
         // Add graceful shutdown
         process.on('SIGINT', async () => {
             console.log('Shutting down gracefully...');
