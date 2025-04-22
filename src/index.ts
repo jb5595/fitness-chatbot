@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import twilio from "twilio";
 import { closeDatabase, setupDatabase } from './database/db.js';
 import dotenv from "dotenv";
+import { getFormattedChatHistory } from "./database/helpers/chatHistory.js";
 import { FitnessAssistantReplyGeneratorService } from "./services/fitnessAssistantReplyGeneratorService.js";
 import { getGymProfileByPhoneNumber } from "./database/helpers/gymProfile.js";
 import VoiceResponse from "twilio/lib/twiml/VoiceResponse.js";
@@ -96,6 +97,20 @@ app.get("/", (req: Request, res: Response) => {
       }
     });
   });
+
+  app.get('/gym/:phoneNumber', async (req: {params: {phoneNumber: string}}, res) => {
+    const gym = await getGymProfileByPhoneNumber(req.params.phoneNumber)
+    res.type("text/xml");
+    res.send(gym)
+  })
+
+  app.get('/gym/:phoneNumber/chatHistory', async (req: {params: {userId: string}}, res) => {
+    const chatHistory = await getFormattedChatHistory(req.params.userId)
+    res.type("text/json");
+    res.send(chatHistory)
+  })
+
+
 // Start the app with database setup
 async function startApp(): Promise<void> {
     try {
