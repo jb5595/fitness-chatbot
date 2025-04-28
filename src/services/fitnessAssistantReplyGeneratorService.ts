@@ -1,5 +1,4 @@
 import { IntentDeterminationService } from "./intentDeterminationService.js";
-import { ScrapingService } from "./scrapingService.js";
 import { OpenAIChatService } from "./openAIChatService.js";
 import { ContextGeneratorService } from "./GymProfileContextGeneratorService.js";
 import { GymProfile } from "../database/helpers/gymProfile.js";
@@ -7,7 +6,6 @@ import { addChatInteraction } from "../database/helpers/chatHistory.js";
 
 interface AssistantConfig {
     calendlyLink: string;
-    websiteUrls: string[];
     systemPrompt: string;
     gymProfile?: GymProfile;
 }
@@ -15,39 +13,45 @@ interface AssistantConfig {
 export class FitnessAssistantReplyGeneratorService {
     private readonly config: AssistantConfig;
     private readonly chatService: OpenAIChatService;
-    private readonly scrapedContentPromise: Promise<string>;
+
 
     constructor(config?: Partial<AssistantConfig>) {
         this.config = {
             calendlyLink: config?.calendlyLink || "calendly.com/jacobberman1995",
-            websiteUrls: config?.websiteUrls || [
-                "https://topeiraboxing.com/about-us/",
-                "https://topeiraboxing.com/faq/"
-            ],
             systemPrompt: config?.systemPrompt || 
                 "You're a fitness coach's assistant. Answer questions about rates, availability, and suggest workouts. Keep it short.",
             gymProfile: config?.gymProfile
         };
         
         this.chatService = new OpenAIChatService();
-        this.scrapedContentPromise = ScrapingService.scrapeUrls(this.config.websiteUrls);
     }
 
     private async getSystemPrompt(): Promise<string> {
         const contexts = [
             this.config.systemPrompt,
-            ContextGeneratorService.generateContextFromGymProfile(this.config.gymProfile),
-            `Additional context from the fitness website: ${await this.scrapedContentPromise}`
+            ContextGeneratorService.generateContextFromGymProfile(this.config.gymProfile)
         ];
 
         return ContextGeneratorService.combineContexts(contexts);
     }
 
     private async generateBookingReply(userInput: string, fromNumber: string): Promise<string> {
+        
+        if (this.config.gymProfile?.bookingType === "CALENDLY"){
         const bookingLink = this.config.calendlyLink;
         const response = `Let's get you scheduled! Book here: ${bookingLink}`;
         await this.logInteraction(fromNumber, userInput, `Sent booking link: ${bookingLink}`);
         return response;
+        }
+        // If its a walkin booking type get their full name to foward to gym after confirmation
+        else{
+            const systemPrompt = await this.getSystemPrompt();
+            const baseMessage = "Let's get you all set up! But first can I get your full name in order to get you confirmed?"
+            const message = await this.chatService.reWriteMessageBasedOnContext(fromNumber,  baseMessage, [systemPrompt])
+            await this.logInteraction(fromNumber, userInput, message);
+            return message
+        }
+
     }
 
     private async generateChatReply(userInput: string, fromNumber: string): Promise<string> {
@@ -64,15 +68,26 @@ export class FitnessAssistantReplyGeneratorService {
         await addChatInteraction(fromNumber, userInput, response);
     }
 
+
+
     async generateReply(userInput: string, fromNumber: string): Promise<string> {
         try {
-            const intent = await IntentDeterminationService.determineIntent(userInput);
+            const intent = await IntentDeterminationService.determineIntent(fromNumber, userInput);
             console.log(`Detected intent: ${intent}`);
 
-            const response = intent === "booking"
-                ? await this.generateBookingReply(userInput, fromNumber)
-                : await this.generateChatReply(userInput, fromNumber);
-            console.log("generated response")
+            let response: string;
+            
+            if (intent === "booking") {
+                response = await this.generateBookingReply(userInput, fromNumber);
+            } else if(intent ==="booking-confirmation" && this.config.gymProfile?.customBookingConfirmationMessage){
+                const systemPrompt = await this.getSystemPrompt();
+
+                response = await this.chatService.reWriteMessageBasedOnContext(fromNumber,  this.config.gymProfile?.customBookingConfirmationMessage, [systemPrompt])
+            }
+            else {
+                response = await this.generateChatReply(userInput, fromNumber);
+            }
+            console.log("generated response");
             return response;
         } catch (error) {
             console.error('Error generating reply:', error);

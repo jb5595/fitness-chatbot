@@ -17,13 +17,18 @@ export class OpenAIChatService {
         this.openai = new OpenAI({ apiKey });
     }
 
+    async reWriteMessageBasedOnContext(customerIdentifier: string, baseMessage: string, systemPrompts: string []){
+        const userPrompt= `Rewrite the following message so it maintains the same intent as the original but is optimized for the current context based on the recent customer history. message ${baseMessage}`
+        return await this.chatWithHistory(customerIdentifier, systemPrompts, [userPrompt])
+    }
+
     async chatWithHistory(customerIdentifier: string, systemPrompts: string[], userPrompts: string[]) {
         const customerHistory = await getFormattedChatHistory(customerIdentifier);
         const customerHistoryAsPrompt = OpenAIChatService.CUSTOMER_HISTORY_PROMPT + `\n${customerHistory}\n`;
         const response = await this.chat(systemPrompts, [customerHistoryAsPrompt, ...userPrompts]);
 
         await addChatInteraction(customerIdentifier, userPrompts[0], response || '');
-        return response;
+        return response || '';
     }
 
     async chat(systemPrompts: string[], userPrompts: string[]) {
