@@ -46,13 +46,6 @@ export async function createGymProfile(gymProfile: GymProfile){
     );
 }
 
-export async function getGyms(){
-    console.log("getting here")
-    await connectToDatabase();
-    const collection = client.db(DB_NAME).collection<GymProfile>(COLLECTION_NAME); // Updated collection name
-    await collection.find();
-}
-
 
 export async function getGymProfileByPhoneNumber(gymPhoneNumber: string): Promise<GymProfile | null> {
     await connectToDatabase();

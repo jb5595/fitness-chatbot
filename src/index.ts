@@ -4,7 +4,7 @@ import { closeDatabase, setupDatabase } from './database/db.ts';
 import dotenv from "dotenv";
 import { getFormattedChatHistory } from "./database/helpers/chatHistory.ts";
 import { FitnessAssistantReplyGeneratorService } from "./services/fitnessAssistantReplyGeneratorService.ts";
-import { getGymProfileByPhoneNumber, getGyms } from "./database/helpers/gymProfile.ts";
+import { getGymProfileByPhoneNumber } from "./database/helpers/gymProfile.ts";
 import VoiceResponse from "twilio/lib/twiml/VoiceResponse.js";
 import { VoiceResponseService } from "./services/callResponseService.ts";
 import path from "path"; // Add this import
@@ -97,13 +97,6 @@ app.post("/voice", (req, res) => {
     const chatHistory = await getFormattedChatHistory(req.params.userId)
     res.type("text/json");
     res.send(JSON.stringify(chatHistory))
-  })
-
-
-  app.get('/gyms', async (req, res) => { 
-    const gym = await getGyms()
-    res.type("text/json");
-    res.send(JSON.stringify(gym))
   })
 
 
