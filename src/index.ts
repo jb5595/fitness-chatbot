@@ -1,23 +1,21 @@
 import express, { Request, Response } from "express";
 import twilio from "twilio";
-import { closeDatabase, setupDatabase } from './database/db.js';
+import { closeDatabase, setupDatabase } from './database/db.ts';
 import dotenv from "dotenv";
-import { getFormattedChatHistory } from "./database/helpers/chatHistory.js";
-import { FitnessAssistantReplyGeneratorService } from "./services/fitnessAssistantReplyGeneratorService.js";
-import { getGymProfileByPhoneNumber } from "./database/helpers/gymProfile.js";
+import { getFormattedChatHistory } from "./database/helpers/chatHistory.ts";
+import { FitnessAssistantReplyGeneratorService } from "./services/fitnessAssistantReplyGeneratorService.ts";
+import { getGymProfileByPhoneNumber, getGyms } from "./database/helpers/gymProfile.ts";
 import VoiceResponse from "twilio/lib/twiml/VoiceResponse.js";
-import { VoiceResponseService } from "./services/callResponseService.js";
+import { VoiceResponseService } from "./services/callResponseService.ts";
 import path from "path"; // Add this import
-
+import cors from "cors"
 
 dotenv.config();
 
 const app = express();
+app.use(cors())
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-const publicPath = path.resolve(__dirname, "..", "public");
-app.use(express.static(publicPath));
 
 // Debug log
 
@@ -89,25 +87,23 @@ app.post("/voice", (req, res) => {
     res.send(twimlResponse);
   });
 
-app.get("/", (req: Request, res: Response) => {
-    res.sendFile(path.join(publicPath, "index.html"), (err) => {
-        if (err) {
-        console.error("Error serving index.html:", err);
-        res.status(500).send("Error serving the page");
-      }
-    });
-  });
-
-  app.get('/gym/:phoneNumber', async (req: {params: {phoneNumber: string}}, res) => {
+  app.get('/gym/:userId', async (req: {params: {phoneNumber: string}}, res) => {
     const gym = await getGymProfileByPhoneNumber(req.params.phoneNumber)
     res.type("text/xml");
     res.send(gym)
   })
 
-  app.get('/gym/:phoneNumber/chatHistory', async (req: {params: {userId: string}}, res) => {
+  app.get('/gym/:userId/chatHistory', async (req: {params: {userId: string}}, res) => {
     const chatHistory = await getFormattedChatHistory(req.params.userId)
     res.type("text/json");
-    res.send(chatHistory)
+    res.send(JSON.stringify(chatHistory))
+  })
+
+
+  app.get('/gyms', async (req, res) => { 
+    const gym = await getGyms()
+    res.type("text/json");
+    res.send(JSON.stringify(gym))
   })
 
 
@@ -115,7 +111,6 @@ app.get("/", (req: Request, res: Response) => {
 async function startApp(): Promise<void> {
     try {
         await setupDatabase();
-        console.log("Serving static files from:", publicPath);
 
         // Add graceful shutdown
         process.on('SIGINT', async () => {

@@ -1,5 +1,5 @@
-import { client, connectToDatabase, DB_NAME } from "../db.js";
-import { BookingType } from "../../types/bookingTypes.js";
+import { client, connectToDatabase, DB_NAME } from "../db.ts";
+import { BookingType } from "../../types/bookingTypes.ts";
 
 const COLLECTION_NAME= 'gymProfiles'
 
@@ -44,6 +44,13 @@ export async function createGymProfile(gymProfile: GymProfile){
     await collection.insertOne(
         gymProfile
     );
+}
+
+export async function getGyms(){
+    console.log("getting here")
+    await connectToDatabase();
+    const collection = client.db(DB_NAME).collection<GymProfile>(COLLECTION_NAME); // Updated collection name
+    await collection.find();
 }
 
 

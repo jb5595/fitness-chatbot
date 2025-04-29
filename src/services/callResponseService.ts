@@ -1,9 +1,9 @@
 // services/callResponseService.ts
 import twilio from "twilio";
 
-import { addConsent } from "../database/helpers/consents.js";
-import { getGymProfileByPhoneNumber, GymProfile } from "../database/helpers/gymProfile.js";
-import { addChatInteraction } from "../database/helpers/chatHistory.js";
+import { addConsent } from "../database/helpers/consents.ts";
+import { getGymProfileByPhoneNumber, GymProfile } from "../database/helpers/gymProfile.ts";
+import { addChatInteraction } from "../database/helpers/chatHistory.ts";
 import VoiceResponse from "twilio/lib/twiml/VoiceResponse.js";
 
 interface VoiceResponseConfig {

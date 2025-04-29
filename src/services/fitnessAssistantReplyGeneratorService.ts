@@ -1,8 +1,8 @@
-import { IntentDeterminationService } from "./intentDeterminationService.js";
-import { OpenAIChatService } from "./openAIChatService.js";
-import { ContextGeneratorService } from "./GymProfileContextGeneratorService.js";
-import { GymProfile } from "../database/helpers/gymProfile.js";
-import { addChatInteraction } from "../database/helpers/chatHistory.js";
+import { IntentDeterminationService } from "./intentDeterminationService.ts";
+import { OpenAIChatService } from "./openAIChatService.ts";
+import { ContextGeneratorService } from "./GymProfileContextGeneratorService.ts";
+import { GymProfile } from "../database/helpers/gymProfile.ts";
+import { addChatInteraction } from "../database/helpers/chatHistory.ts";
 
 interface AssistantConfig {
     calendlyLink: string;

@@ -1,4 +1,4 @@
-import { OpenAIChatService } from "./openAIChatService.js";
+import { OpenAIChatService } from "./openAIChatService.ts";
 
 type Intent = "booking" | "general question"| "booking-confirmation" | "other";
 
