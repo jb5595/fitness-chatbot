@@ -12,6 +12,7 @@ export interface GymProfile {
     bookingType?: BookingType;
     customBookingConfirmationMessage?: string;
     pricing: string;
+    forwardingNumber?: string;
     websiteData?: { [url: string]: string };
     additionalInfo: string[];
     lastUpdated: number;
