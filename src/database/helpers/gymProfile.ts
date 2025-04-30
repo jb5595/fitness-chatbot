@@ -1,4 +1,5 @@
 import { client, connectToDatabase, DB_NAME } from "../db.js";
+import { BookingType } from "../../types/bookingTypes.js";
 
 const COLLECTION_NAME= 'gymProfiles'
 
@@ -8,6 +9,8 @@ export interface GymProfile {
     phoneNumber: string
     description?: string;
     scheduleInfo?: string;
+    bookingType?: BookingType;
+    customBookingConfirmationMessage?: string;
     pricing: string;
     websiteData?: { [url: string]: string };
     additionalInfo: string[];

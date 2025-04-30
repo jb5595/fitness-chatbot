@@ -48,6 +48,7 @@ app.post("/sms", async (req: TwilioRequest, res: Response) => {
     const replyGenerator = new FitnessAssistantReplyGeneratorService({
         gymProfile: gymProfile
     });
+    
     const response = await replyGenerator.generateReply(userInput, fromNumber);
     console.log("Sending response");
     twiml.message(response);
