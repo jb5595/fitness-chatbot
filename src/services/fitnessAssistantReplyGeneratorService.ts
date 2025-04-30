@@ -77,6 +77,7 @@ export class FitnessAssistantReplyGeneratorService {
 
     // Send a confirmation SMS to the gym's forwarding number
     private async sendConfirmationTextToGym(userNumber: string, userInput: string, confirmationMessage: string): Promise<void> {
+
         if (!this.config.gymProfile?.forwardingNumber) {
         console.warn("No forwarding number found in gym profile. Skipping confirmation SMS.");
         return;
@@ -112,12 +113,11 @@ export class FitnessAssistantReplyGeneratorService {
 
                 response = await this.chatService.reWriteMessageBasedOnContext(fromNumber,  this.config.gymProfile?.customBookingConfirmationMessage, [systemPrompt])
                 this.sendConfirmationTextToGym(fromNumber, userInput, response)
-            
             }
             else {
                 response = await this.generateChatReply(userInput, fromNumber);
             }
-            console.log("generated response");
+            console.log("generated response", response);
             return response;
         } catch (error) {
             console.error('Error generating reply:', error);
