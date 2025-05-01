@@ -35,57 +35,56 @@ export class FitnessAssistantReplyGeneratorService {
         return ContextGeneratorService.combineContexts(contexts);
     }
 
-    private async generateBookingReply(userInput: string, fromNumber: string): Promise<string> {
-        
+    private async generateBookingReply(userInput: string, userPhoneNumber: string, gymPhoneNumber: string): Promise<string> {
+
         if (this.config.gymProfile?.bookingType === "CALENDLY"){
         const bookingLink = this.config.calendlyLink;
         const response = `Let's get you scheduled! Book here: ${bookingLink}`;
-        await this.logInteraction(fromNumber, userInput, `Sent booking link: ${bookingLink}`);
+        await this.logInteraction(userPhoneNumber, gymPhoneNumber, userInput, `Sent booking link: ${bookingLink}`);
         return response;
         }
         // If its a walkin booking type get their full name to foward to gym after confirmation
         else{
             const systemPrompt = await this.getSystemPrompt();
             const baseMessage = "Let's get you all set up! But first can I get your full name in order to get you confirmed?"
-            const message = await this.chatService.reWriteMessageBasedOnContext(fromNumber,  baseMessage, [systemPrompt])
-            await this.logInteraction(fromNumber, userInput, message);
+            const message = await this.chatService.reWriteMessageBasedOnContext(userPhoneNumber, gymPhoneNumber, baseMessage, [systemPrompt])
+            await this.logInteraction(userPhoneNumber, gymPhoneNumber, userInput, message);
             return message
         }
 
     }
 
-    private async generateChatReply(userInput: string, fromNumber: string): Promise<string> {
+    private async generateChatReply(userInput: string, userPhoneNumber: string, gymPhoneNumber: string): Promise<string> {
         const systemPrompt = await this.getSystemPrompt();
         const response = await this.chatService.chatWithHistory(
-            fromNumber,
+            userPhoneNumber,
+            gymPhoneNumber,
             [systemPrompt],
             [userInput]
         );
         return response || '';
     }
 
-    private async logInteraction(fromNumber: string, userInput: string, response: string): Promise<void> {
-        await addChatInteraction(fromNumber, userInput, response);
+    private async logInteraction(userPhoneNumber: string, gymPhoneNumber: string, userInput: string, response: string): Promise<void> {
+        await addChatInteraction(userPhoneNumber, gymPhoneNumber, userInput, response);
     }
 
-
-
-    async generateReply(userInput: string, fromNumber: string): Promise<string> {
+    async generateReply(userInput: string, userPhoneNumber: string, gymPhoneNumber: string): Promise<string> {
         try {
-            const intent = await IntentDeterminationService.determineIntent(fromNumber, userInput);
+            const intent = await IntentDeterminationService.determineIntent(userPhoneNumber, gymPhoneNumber, userInput);
             console.log(`Detected intent: ${intent}`);
 
             let response: string;
             
             if (intent === "booking") {
-                response = await this.generateBookingReply(userInput, fromNumber);
+                response = await this.generateBookingReply(userInput, userPhoneNumber, gymPhoneNumber);
             } else if(intent ==="booking-confirmation" && this.config.gymProfile?.customBookingConfirmationMessage){
                 const systemPrompt = await this.getSystemPrompt();
 
-                response = await this.chatService.reWriteMessageBasedOnContext(fromNumber,  this.config.gymProfile?.customBookingConfirmationMessage, [systemPrompt])
+                response = await this.chatService.reWriteMessageBasedOnContext(userPhoneNumber, gymPhoneNumber, this.config.gymProfile?.customBookingConfirmationMessage, [systemPrompt])
             }
             else {
-                response = await this.generateChatReply(userInput, fromNumber);
+                response = await this.generateChatReply(userInput, userPhoneNumber, gymPhoneNumber);
             }
             console.log("generated response");
             return response;

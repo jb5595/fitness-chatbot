@@ -29,11 +29,11 @@ interface TwilioRequest extends Request {
 
 app.post("/sms", async (req: TwilioRequest, res: Response) => {
     const userInput = req.body.Body;
-    const fromNumber = req.body.From;
-    const toNumber = req.body.To.replace(/\D/g, '');
+    const userPhoneNumber = req.body.From;
+    const gymPhoneNumber = req.body.To.replace(/\D/g, '');
 
-    console.log(`Receiving request from: ${fromNumber}, to: ${toNumber}, content: ${userInput}`);
-    const gymProfile = await getGymProfileByPhoneNumber(toNumber);
+    console.log(`Receiving request from: ${userPhoneNumber}, to: ${gymPhoneNumber}, content: ${userInput}`);
+    const gymProfile = await getGymProfileByPhoneNumber(gymPhoneNumber);
 
     const twiml = new twilio.twiml.MessagingResponse();
 
@@ -47,8 +47,7 @@ app.post("/sms", async (req: TwilioRequest, res: Response) => {
     const replyGenerator = new FitnessAssistantReplyGeneratorService({
         gymProfile: gymProfile
     });
-    
-    const response = await replyGenerator.generateReply(userInput, fromNumber);
+    const response = await replyGenerator.generateReply(userInput, userPhoneNumber, gymPhoneNumber);
     console.log("Sending response");
     twiml.message(response);
     res.type("text/xml");
