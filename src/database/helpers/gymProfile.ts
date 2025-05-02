@@ -1,5 +1,5 @@
-import { client, connectToDatabase, DB_NAME } from "../db.ts";
-import { BookingType } from "../../types/bookingTypes.ts";
+import { client, connectToDatabase, DB_NAME } from "../db";
+import { BookingType } from "../../types/bookingTypes";
 
 const COLLECTION_NAME= 'gymProfiles'
 

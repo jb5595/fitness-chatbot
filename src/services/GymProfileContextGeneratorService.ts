@@ -1,4 +1,4 @@
-import { GymProfile } from "../database/helpers/gymProfile.ts";
+import { GymProfile } from "../database/helpers/gymProfile";
 
 export class ContextGeneratorService {
     static generateContextFromGymProfile(profile?: GymProfile ): string {
