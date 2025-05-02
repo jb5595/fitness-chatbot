@@ -1,41 +1,67 @@
-import {  client, connectToDatabase, DB_NAME } from "../db.js";
+import {  client, connectToDatabase, DB_NAME } from "../db.ts";
 
 const COLLECTION_NAME = "chat_history"
 
 
 // Type definitions
 interface ChatInteraction {
+    userPhoneNumber: string;
+    gymPhoneNumber: string;
     userMessage: string;
     assistantResponse: string;
     timestamp: number;
 }
 
 // Chat History Management
-export async function getChatHistory(userId: string): Promise<ChatInteraction[]> {
+export async function getChatHistoryByUserPhoneNumber(userPhoneNumber: string, gymPhoneNumber: string): Promise<ChatInteraction[]> {
     await connectToDatabase();
     const collection = client.db(DB_NAME).collection<ChatInteraction>(COLLECTION_NAME);
-    return await collection.find({ userId }).toArray();
+    return await collection.find({userPhoneNumber: userPhoneNumber, gymPhoneNumber: gymPhoneNumber}).toArray();
+}
+
+export async function getUserPhoneNumbersByGym(gymPhoneNumber: string): Promise<string[]> {
+    await connectToDatabase();
+    const collection = client.db(DB_NAME).collection<ChatInteraction>(COLLECTION_NAME);
+  
+    // Find all documents with the given gymPhoneNumber and project only userPhoneNumber
+    const results = await collection
+      .find({ gymPhoneNumber }, { projection: { userPhoneNumber: 1, _id: 0 } })
+      .toArray();
+  
+    // Extract userPhoneNumber from each document
+    const userPhoneNumbers = results.map(doc => doc.userPhoneNumber);
+    
+    // return a unique list
+    return userPhoneNumbers.filter((value, index, array) => array.indexOf(value) === index);
+  }
+
+export async function getChatHistoryByGymPhoneNumber(gymPhoneNumber: string): Promise<ChatInteraction[]> {
+    await connectToDatabase();
+    const collection = client.db(DB_NAME).collection<ChatInteraction>(COLLECTION_NAME);
+    return await collection.find({gymPhoneNumber}).toArray();
 }
 
 export async function addChatInteraction(
-    userId: string, 
+    userPhoneNumber: string, 
+    gymPhoneNumber: string,
     userMessage: string, 
     assistantResponse: string
 ): Promise<void> {
     await connectToDatabase();
-    const collection = client.db(DB_NAME).collection<ChatInteraction & { userId: string }>(COLLECTION_NAME);
+    const collection = client.db(DB_NAME).collection<ChatInteraction>(COLLECTION_NAME);
     
 
     await collection.insertOne({
-        userId,
+        userPhoneNumber,
+        gymPhoneNumber,
         userMessage,
         assistantResponse,
         timestamp: Date.now()
     });
 }
 
-export async function getFormattedChatHistory(userId: string): Promise<string> {
-    const history = await getChatHistory(userId);
+export async function getFormattedChatHistoryByUserPhoneNumber(userPhoneNumber: string, gymPhoneNumber: string): Promise<string> {
+    const history = await getChatHistoryByUserPhoneNumber(userPhoneNumber, gymPhoneNumber);
     return history
         .map((entry) => `Q: ${entry.userMessage}\nA: ${entry.assistantResponse}`)
         .join("\n");

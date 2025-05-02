@@ -1,9 +1,9 @@
 // services/callResponseService.ts
 import twilio from "twilio";
 
-import { addConsent } from "../database/helpers/consents.js";
-import { getGymProfileByPhoneNumber, GymProfile } from "../database/helpers/gymProfile.js";
-import { addChatInteraction } from "../database/helpers/chatHistory.js";
+import { addConsent } from "../database/helpers/consents.ts";
+import { getGymProfileByPhoneNumber, GymProfile } from "../database/helpers/gymProfile.ts";
+import { addChatInteraction } from "../database/helpers/chatHistory.ts";
 import VoiceResponse from "twilio/lib/twiml/VoiceResponse.js";
 
 interface VoiceResponseConfig {
@@ -28,19 +28,19 @@ export class VoiceResponseService {
     );
   }
 
-  private async sendTextResponse(userId: string, toNumber: string): Promise<string> {
-    const gymProfile: GymProfile | null = await getGymProfileByPhoneNumber(toNumber);
+  private async sendTextResponse(userPhoneNumber: string, gymPhoneNumber: string): Promise<string> {
+    const gymProfile: GymProfile | null = await getGymProfileByPhoneNumber(gymPhoneNumber);
     const gymName = gymProfile?.name || "Us"
     const response = `Thanks for calling ${gymName}! How can we assist you today? Reply here.`;
     await this.twilioClient.messages.create({
       body: response,
       from: this.config.twilioNumber,
-      to: userId,
+      to: userPhoneNumber,
     });
-    console.log(`Sent SMS to ${userId}: ${response}`);
+    console.log(`Sent SMS to ${userPhoneNumber}: ${response}`);
 
-    await addChatInteraction(userId, "Requested text via call", response);
-    await addConsent(userId, toNumber, `User requested text response via voice call to ${toNumber}`);
+    await addChatInteraction(userPhoneNumber, gymPhoneNumber, "Requested text via call", response);
+    await addConsent(userPhoneNumber, gymPhoneNumber, `User requested text response via voice call to ${gymPhoneNumber}`);
 
     return "We’ve sent you a text. Please reply there. Goodbye.";
   }

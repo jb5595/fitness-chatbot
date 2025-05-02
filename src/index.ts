@@ -1,22 +1,31 @@
 import express, { Request, Response } from "express";
 import twilio from "twilio";
-import { closeDatabase, setupDatabase } from './database/db.js';
+import { closeDatabase, setupDatabase } from './database/db.ts';
 import dotenv from "dotenv";
-import { FitnessAssistantReplyGeneratorService } from "./services/fitnessAssistantReplyGeneratorService.js";
-import { getGymProfileByPhoneNumber } from "./database/helpers/gymProfile.js";
+import { getFormattedChatHistoryByUserPhoneNumber, getUserPhoneNumbersByGym } from "./database/helpers/chatHistory.ts";
+import { FitnessAssistantReplyGeneratorService } from "./services/fitnessAssistantReplyGeneratorService.ts";
+import { getGymProfileByPhoneNumber } from "./database/helpers/gymProfile.ts";
 import VoiceResponse from "twilio/lib/twiml/VoiceResponse.js";
-import { VoiceResponseService } from "./services/callResponseService.js";
-import path from "path"; // Add this import
-
+import { VoiceResponseService } from "./services/callResponseService.ts";
+import cors from "cors"
+import { extractPhoneNumber } from "./database/helpers/extractPhoneNumber.ts";
 
 dotenv.config();
 
+const ALLOWED_ORIGINS = [
+  'http://localhost:3001',
+];
+
+const corsOptions = {
+  origin: ALLOWED_ORIGINS,
+  optionSuccessStatus: 200,
+};
+
 const app = express();
+
+app.use(cors(corsOptions))
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-const publicPath = path.resolve(__dirname, "..", "public");
-app.use(express.static(publicPath));
 
 // Debug log
 
@@ -30,11 +39,11 @@ interface TwilioRequest extends Request {
 
 app.post("/sms", async (req: TwilioRequest, res: Response) => {
     const userInput = req.body.Body;
-    const fromNumber = req.body.From;
-    const toNumber = req.body.To.replace(/\D/g, '');
+    const userPhoneNumber = extractPhoneNumber(req.body.From);
+    const gymPhoneNumber = req.body.To.replace(/\D/g, '');
 
-    console.log(`Receiving request from: ${fromNumber}, to: ${toNumber}, content: ${userInput}`);
-    const gymProfile = await getGymProfileByPhoneNumber(toNumber);
+    console.log(`Receiving request from: ${userPhoneNumber}, to: ${gymPhoneNumber}, content: ${userInput}`);
+    const gymProfile = await getGymProfileByPhoneNumber(gymPhoneNumber);
 
     const twiml = new twilio.twiml.MessagingResponse();
 
@@ -48,8 +57,7 @@ app.post("/sms", async (req: TwilioRequest, res: Response) => {
     const replyGenerator = new FitnessAssistantReplyGeneratorService({
         gymProfile: gymProfile
     });
-    
-    const response = await replyGenerator.generateReply(userInput, fromNumber);
+    const response = await replyGenerator.generateReply(userInput, userPhoneNumber, gymPhoneNumber);
     console.log("Sending response");
     twiml.message(response);
     res.type("text/xml");
@@ -88,19 +96,29 @@ app.post("/voice", (req, res) => {
     res.send(twimlResponse);
   });
 
-app.get("/", (req: Request, res: Response) => {
-    res.sendFile(path.join(publicPath, "index.html"), (err) => {
-        if (err) {
-        console.error("Error serving index.html:", err);
-        res.status(500).send("Error serving the page");
-      }
-    });
-  });
+  app.get('/gym/:gymPhoneNumber', async (req: {params: {gymPhoneNumber: string}}, res) => {
+    const gym = await getGymProfileByPhoneNumber(req.params.gymPhoneNumber)
+    res.type("text/json");
+    res.send(JSON.stringify(gym))
+  })
+
+  app.get('/chat-history/gym/:gymPhoneNumber/users', async (req: {params: {gymPhoneNumber: string}}, res) => {
+    const userList = await getUserPhoneNumbersByGym(req.params.gymPhoneNumber)
+    res.type("text/json");
+    res.send(JSON.stringify(userList))
+  })
+
+  app.get('/chat-history/gym/:gymPhoneNumber/chats/:userPhoneNumber', async (req: {params: {gymPhoneNumber: string, userPhoneNumber: string}}, res) => {
+    const chatHistory = await getFormattedChatHistoryByUserPhoneNumber(req.params.userPhoneNumber, req.params.gymPhoneNumber)
+    res.type("text/json");
+    res.send(JSON.stringify(chatHistory))
+  })
+
+
 // Start the app with database setup
 async function startApp(): Promise<void> {
     try {
         await setupDatabase();
-        console.log("Serving static files from:", publicPath);
 
         // Add graceful shutdown
         process.on('SIGINT', async () => {

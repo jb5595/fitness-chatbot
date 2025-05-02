@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 import dotenv from "dotenv";
-import { addChatInteraction, getFormattedChatHistory } from "../database/helpers/chatHistory.js";
+import { addChatInteraction, getFormattedChatHistoryByUserPhoneNumber } from "../database/helpers/chatHistory.ts";
 
 
 dotenv.config();
@@ -17,17 +17,17 @@ export class OpenAIChatService {
         this.openai = new OpenAI({ apiKey });
     }
 
-    async reWriteMessageBasedOnContext(customerIdentifier: string, baseMessage: string, systemPrompts: string []){
+    async reWriteMessageBasedOnContext(userPhoneNumber: string, gymPhoneNumber: string, baseMessage: string, systemPrompts: string []){
         const userPrompt= `Rewrite the following message so it maintains the same intent as the original but is optimized for the current context based on the recent customer history. message ${baseMessage}`
-        return await this.chatWithHistory(customerIdentifier, systemPrompts, [userPrompt])
+        return await this.chatWithHistory(userPhoneNumber, gymPhoneNumber, systemPrompts, [userPrompt])
     }
 
-    async chatWithHistory(customerIdentifier: string, systemPrompts: string[], userPrompts: string[]) {
-        const customerHistory = await getFormattedChatHistory(customerIdentifier);
+    async chatWithHistory(userPhoneNumber: string, gymPhoneNumber: string, systemPrompts: string[], userPrompts: string[]) {
+        const customerHistory = await getFormattedChatHistoryByUserPhoneNumber(userPhoneNumber, gymPhoneNumber);
         const customerHistoryAsPrompt = OpenAIChatService.CUSTOMER_HISTORY_PROMPT + `\n${customerHistory}\n`;
         const response = await this.chat(systemPrompts, [customerHistoryAsPrompt, ...userPrompts]);
 
-        await addChatInteraction(customerIdentifier, userPrompts[0], response || '');
+        await addChatInteraction(userPhoneNumber, gymPhoneNumber, userPrompts[0], response || '');
         return response || '';
     }
 
