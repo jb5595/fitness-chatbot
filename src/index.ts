@@ -12,8 +12,18 @@ import { extractPhoneNumber } from "./database/helpers/extractPhoneNumber.ts";
 
 dotenv.config();
 
+const ALLOWED_ORIGINS = [
+  'http://localhost:3001',
+];
+
+const corsOptions = {
+  origin: ALLOWED_ORIGINS,
+  optionSuccessStatus: 200,
+};
+
 const app = express();
-app.use(cors())
+
+app.use(cors(corsOptions))
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -92,14 +102,14 @@ app.post("/voice", (req, res) => {
     res.send(JSON.stringify(gym))
   })
 
-  app.get('/gym/:gymPhoneNumber/users', async (req: {params: {gymPhoneNumber: string}}, res) => {
+  app.get('/chat-history/gym/:gymPhoneNumber/users', async (req: {params: {gymPhoneNumber: string}}, res) => {
     const userList = await getUserPhoneNumbersByGym(req.params.gymPhoneNumber)
     res.type("text/json");
     res.send(JSON.stringify(userList))
   })
 
-  app.get('/gym/:gymPhoneNumber/chats/:userPhoneNumber', async (req: {params: {gymPhoneNumber: string, userPhoneNumber: string}}, res) => {
-    const chatHistory = await getFormattedChatHistoryByUserPhoneNumber(req.params.userPhoneNumber)
+  app.get('/chat-history/gym/:gymPhoneNumber/chats/:userPhoneNumber', async (req: {params: {gymPhoneNumber: string, userPhoneNumber: string}}, res) => {
+    const chatHistory = await getFormattedChatHistoryByUserPhoneNumber(req.params.userPhoneNumber, req.params.gymPhoneNumber)
     res.type("text/json");
     res.send(JSON.stringify(chatHistory))
   })

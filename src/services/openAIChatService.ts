@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 import dotenv from "dotenv";
-import { addChatInteraction, getFormattedChatHistory } from "../database/helpers/chatHistory.ts";
+import { addChatInteraction, getFormattedChatHistoryByUserPhoneNumber } from "../database/helpers/chatHistory.ts";
 
 
 dotenv.config();
@@ -23,7 +23,7 @@ export class OpenAIChatService {
     }
 
     async chatWithHistory(userPhoneNumber: string, gymPhoneNumber: string, systemPrompts: string[], userPrompts: string[]) {
-        const customerHistory = await getFormattedChatHistory(userPhoneNumber);
+        const customerHistory = await getFormattedChatHistoryByUserPhoneNumber(userPhoneNumber, gymPhoneNumber);
         const customerHistoryAsPrompt = OpenAIChatService.CUSTOMER_HISTORY_PROMPT + `\n${customerHistory}\n`;
         const response = await this.chat(systemPrompts, [customerHistoryAsPrompt, ...userPrompts]);
 

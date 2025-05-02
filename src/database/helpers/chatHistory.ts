@@ -13,10 +13,10 @@ interface ChatInteraction {
 }
 
 // Chat History Management
-export async function getChatHistoryByUserPhoneNumber(userPhoneNumber: string): Promise<ChatInteraction[]> {
+export async function getChatHistoryByUserPhoneNumber(userPhoneNumber: string, gymPhoneNumber: string): Promise<ChatInteraction[]> {
     await connectToDatabase();
     const collection = client.db(DB_NAME).collection<ChatInteraction>(COLLECTION_NAME);
-    return await collection.find({userPhoneNumber}).toArray();
+    return await collection.find({userPhoneNumber: userPhoneNumber, gymPhoneNumber: gymPhoneNumber}).toArray();
 }
 
 export async function getUserPhoneNumbersByGym(gymPhoneNumber: string): Promise<string[]> {
@@ -60,8 +60,8 @@ export async function addChatInteraction(
     });
 }
 
-export async function getFormattedChatHistoryByUserPhoneNumber(userPhoneNumber: string): Promise<string> {
-    const history = await getChatHistoryByUserPhoneNumber(userPhoneNumber);
+export async function getFormattedChatHistoryByUserPhoneNumber(userPhoneNumber: string, gymPhoneNumber: string): Promise<string> {
+    const history = await getChatHistoryByUserPhoneNumber(userPhoneNumber, gymPhoneNumber);
     return history
         .map((entry) => `Q: ${entry.userMessage}\nA: ${entry.assistantResponse}`)
         .join("\n");
