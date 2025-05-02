@@ -1,4 +1,4 @@
-import { client, DB_NAME } from "../db.ts";
+import { client, DB_NAME } from "../db";
 
 type TEXT_CONSENT = 'text_consent'
 

@@ -1,20 +1,22 @@
 {
+  "ts-node": {  "files": true, "require": ["tsconfig-paths/register"] },
   "compilerOptions": {
-    "target": "ESNext",
-    "module": "CommonJS",
-    "moduleResolution": "node",
-    "strict": true,
-    "esModuleInterop": true,
-    "allowImportingTsExtensions": true,
-    "noEmit": true,
-    "skipLibCheck": true,
-    "outDir": "./dist",
-    "rootDir": "./src"
+     "lib": [
+        "es5",
+        "es6"
+     ],
+     "target": "es6",
+     "module": "commonjs",
+     "moduleResolution": "node",
+     "outDir": "./dist",
+     "emitDecoratorMetadata": true,
+     "experimentalDecorators": true,
+     "sourceMap": true,
+     "esModuleInterop": true,
+     "allowSyntheticDefaultImports": true,
+     "noImplicitAny": true,
+     "resolveJsonModule": true
   },
-  "ts-node": {
-    "esm": true
-  },
-  "lib": ["esnext"],
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "exclude": ["**/*.spec.ts", "tsconfig.json", "node_modules", "dist"],
+  "include": ["src/**/*"]
 }

@@ -1,14 +1,14 @@
 import express, { Request, Response } from "express";
 import twilio from "twilio";
-import { closeDatabase, setupDatabase } from './database/db.ts';
+import { closeDatabase, setupDatabase } from './database/db';
 import dotenv from "dotenv";
-import { getFormattedChatHistoryByUserPhoneNumber, getUserPhoneNumbersByGym } from "./database/helpers/chatHistory.ts";
-import { FitnessAssistantReplyGeneratorService } from "./services/fitnessAssistantReplyGeneratorService.ts";
-import { getGymProfileByPhoneNumber } from "./database/helpers/gymProfile.ts";
+import { getFormattedChatHistoryByUserPhoneNumber, getUserPhoneNumbersByGym } from "./database/helpers/chatHistory";
+import { FitnessAssistantReplyGeneratorService } from "./services/fitnessAssistantReplyGeneratorService";
+import { getGymProfileByPhoneNumber } from "./database/helpers/gymProfile";
 import VoiceResponse from "twilio/lib/twiml/VoiceResponse.js";
-import { VoiceResponseService } from "./services/callResponseService.ts";
+import { VoiceResponseService } from "./services/callResponseService";
 import cors from "cors"
-import { extractPhoneNumber } from "./database/helpers/extractPhoneNumber.ts";
+import { extractPhoneNumber } from "./database/helpers/extractPhoneNumber";
 
 dotenv.config();
 

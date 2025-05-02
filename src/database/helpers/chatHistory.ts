@@ -1,4 +1,4 @@
-import {  client, connectToDatabase, DB_NAME } from "../db.ts";
+import {  client, connectToDatabase, DB_NAME } from "../db";
 
 const COLLECTION_NAME = "chat_history"
 
