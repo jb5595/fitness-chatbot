@@ -2,13 +2,13 @@ import express, { Request, Response } from "express";
 import twilio from "twilio";
 import { closeDatabase, setupDatabase } from './database/db.ts';
 import dotenv from "dotenv";
-import { getFormattedChatHistory } from "./database/helpers/chatHistory.ts";
+import { getFormattedChatHistoryByUserPhoneNumber, getUserPhoneNumbersByGym } from "./database/helpers/chatHistory.ts";
 import { FitnessAssistantReplyGeneratorService } from "./services/fitnessAssistantReplyGeneratorService.ts";
 import { getGymProfileByPhoneNumber } from "./database/helpers/gymProfile.ts";
 import VoiceResponse from "twilio/lib/twiml/VoiceResponse.js";
 import { VoiceResponseService } from "./services/callResponseService.ts";
-import path from "path"; // Add this import
 import cors from "cors"
+import { extractPhoneNumber } from "./database/helpers/extractPhoneNumber.ts";
 
 dotenv.config();
 
@@ -29,7 +29,7 @@ interface TwilioRequest extends Request {
 
 app.post("/sms", async (req: TwilioRequest, res: Response) => {
     const userInput = req.body.Body;
-    const userPhoneNumber = req.body.From;
+    const userPhoneNumber = extractPhoneNumber(req.body.From);
     const gymPhoneNumber = req.body.To.replace(/\D/g, '');
 
     console.log(`Receiving request from: ${userPhoneNumber}, to: ${gymPhoneNumber}, content: ${userInput}`);
@@ -86,14 +86,20 @@ app.post("/voice", (req, res) => {
     res.send(twimlResponse);
   });
 
-  app.get('/gym/:userId', async (req: {params: {phoneNumber: string}}, res) => {
-    const gym = await getGymProfileByPhoneNumber(req.params.phoneNumber)
-    res.type("text/xml");
-    res.send(gym)
+  app.get('/gym/:gymPhoneNumber', async (req: {params: {gymPhoneNumber: string}}, res) => {
+    const gym = await getGymProfileByPhoneNumber(req.params.gymPhoneNumber)
+    res.type("text/json");
+    res.send(JSON.stringify(gym))
   })
 
-  app.get('/gym/:userId/chatHistory', async (req: {params: {userId: string}}, res) => {
-    const chatHistory = await getFormattedChatHistory(req.params.userId)
+  app.get('/gym/:gymPhoneNumber/users', async (req: {params: {gymPhoneNumber: string}}, res) => {
+    const userList = await getUserPhoneNumbersByGym(req.params.gymPhoneNumber)
+    res.type("text/json");
+    res.send(JSON.stringify(userList))
+  })
+
+  app.get('/gym/:gymPhoneNumber/chats/:userPhoneNumber', async (req: {params: {gymPhoneNumber: string, userPhoneNumber: string}}, res) => {
+    const chatHistory = await getFormattedChatHistoryByUserPhoneNumber(req.params.userPhoneNumber)
     res.type("text/json");
     res.send(JSON.stringify(chatHistory))
   })

@@ -13,10 +13,32 @@ interface ChatInteraction {
 }
 
 // Chat History Management
-export async function getChatHistory(userPhoneNumber: string): Promise<ChatInteraction[]> {
+export async function getChatHistoryByUserPhoneNumber(userPhoneNumber: string): Promise<ChatInteraction[]> {
     await connectToDatabase();
     const collection = client.db(DB_NAME).collection<ChatInteraction>(COLLECTION_NAME);
     return await collection.find({userPhoneNumber}).toArray();
+}
+
+export async function getUserPhoneNumbersByGym(gymPhoneNumber: string): Promise<string[]> {
+    await connectToDatabase();
+    const collection = client.db(DB_NAME).collection<ChatInteraction>(COLLECTION_NAME);
+  
+    // Find all documents with the given gymPhoneNumber and project only userPhoneNumber
+    const results = await collection
+      .find({ gymPhoneNumber }, { projection: { userPhoneNumber: 1, _id: 0 } })
+      .toArray();
+  
+    // Extract userPhoneNumber from each document
+    const userPhoneNumbers = results.map(doc => doc.userPhoneNumber);
+    
+    // return a unique list
+    return userPhoneNumbers.filter((value, index, array) => array.indexOf(value) === index);
+  }
+
+export async function getChatHistoryByGymPhoneNumber(gymPhoneNumber: string): Promise<ChatInteraction[]> {
+    await connectToDatabase();
+    const collection = client.db(DB_NAME).collection<ChatInteraction>(COLLECTION_NAME);
+    return await collection.find({gymPhoneNumber}).toArray();
 }
 
 export async function addChatInteraction(
@@ -38,8 +60,8 @@ export async function addChatInteraction(
     });
 }
 
-export async function getFormattedChatHistory(userPhoneNumber: string): Promise<string> {
-    const history = await getChatHistory(userPhoneNumber);
+export async function getFormattedChatHistoryByUserPhoneNumber(userPhoneNumber: string): Promise<string> {
+    const history = await getChatHistoryByUserPhoneNumber(userPhoneNumber);
     return history
         .map((entry) => `Q: ${entry.userMessage}\nA: ${entry.assistantResponse}`)
         .join("\n");
