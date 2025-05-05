@@ -15,7 +15,7 @@ dotenv.config();
 const ALLOWED_ORIGINS = [
   'http://localhost:3001',
   'https://fitness-chatbot-ui.vercel.app',
-  '*.vercel.app',
+  /vercel\.app$/,
 ];
 
 const corsOptions = {
