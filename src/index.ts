@@ -107,8 +107,7 @@ app.post("/voice", (req, res) => {
   app.get('/chat-history/gym/:gymPhoneNumber/users', async (req: {params: {gymPhoneNumber: string}}, res) => {
     const userList = await getUserPhoneNumbersByGym(req.params.gymPhoneNumber)
     res.type("text/json");
-    console.log("test")
-    res.send(JSON.stringify(userList.push("something")))
+    res.send(JSON.stringify(userList))
   })
 
   app.get('/chat-history/gym/:gymPhoneNumber/chats/:userPhoneNumber', async (req: {params: {gymPhoneNumber: string, userPhoneNumber: string}}, res) => {
