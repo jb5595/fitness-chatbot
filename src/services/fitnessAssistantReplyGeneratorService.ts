@@ -3,6 +3,7 @@ import { OpenAIChatService } from "./openAIChatService";
 import { ContextGeneratorService } from "./GymProfileContextGeneratorService";
 import { GymProfile } from "../database/helpers/gymProfile";
 import twilio from "twilio";
+import { addChatInteraction } from "../database/helpers/chatHistory";
 
 
 interface AssistantConfig {
@@ -89,6 +90,9 @@ export class FitnessAssistantReplyGeneratorService {
                 response = await this.generateChatReply(userInput, userPhoneNumber, gymPhoneNumber);
             }
             console.log("generated response");
+
+            await addChatInteraction(userPhoneNumber, gymPhoneNumber, userInput, response || '');
+
             return response;
         } catch (error) {
             console.error('Error generating reply:', error);
