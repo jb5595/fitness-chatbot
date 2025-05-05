@@ -1,6 +1,6 @@
 
 type BookingTypeCalendly = "CALENDLY"
-type BookingTypeWalkIn = "WALK_IN"
+type BookingTypeFreeTrialWalkIn = "FREE_TRIAL_WALK_IN"
 
-export type BookingType = BookingTypeCalendly | BookingTypeWalkIn
+export type BookingType = BookingTypeCalendly | BookingTypeFreeTrialWalkIn
 

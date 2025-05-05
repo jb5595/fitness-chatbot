@@ -3,6 +3,19 @@ import { BookingType } from "../../types/bookingTypes";
 
 const COLLECTION_NAME= 'gymProfiles'
 
+//I.e. Has free trials monday and wednsday at 7pm
+// monday => ["19:00"]
+// wednesday => ["19:00"]
+export type FreeTrialSchedule = {
+    sunday?: string[]
+    monday?: string[]
+    tuesday?: string[]
+    wednesday?: string[]
+    thursday?: string[]
+    friday?: string[]
+    saturday?: string[]
+}
+
 export interface GymProfile {
     _id?: string;  // MongoDB ID
     name: string;
@@ -10,7 +23,9 @@ export interface GymProfile {
     description?: string;
     scheduleInfo?: string;
     bookingType?: BookingType;
-    customBookingConfirmationMessage?: string;
+    freeTrialSchedule?: FreeTrialSchedule;
+    forwardingNumber?: string
+    calendlyLink?: string;
     pricing: string;
     websiteData?: { [url: string]: string };
     additionalInfo: string[];
@@ -67,8 +82,10 @@ export async function initializeDefaultGymProfile(): Promise<void> {
           "facilities": "Modern facility with full-size ring, heavy bags, speed bags, and conditioning equipment."
         },
         "additionalInfo": [
-          "For all new people inquiring about joining Topeira Boxing Club: your first class is a free trial with gloves and wraps provided if needed, held on Tuesdays and Thursdays at 7pm or 8pm, or Saturdays at 9am or 10am; please arrive 20 minutes early to check class capacity, sign a safety waiver, and get your hands wrapped and warmed up, as late arrivals must wait for the next free trial class; bring water and workout clothing, and note that previous experience will be assessed by coaches with no immediate sparring allowed—most importantly, have fun!"
+          "For free trial classes please arrive 20 minutes early to check class capacity, sign a safety waiver, and get your hands wrapped and warmed up, as late arrivals must wait for the next free trial class; bring water and workout clothing, and note that previous experience will be assessed by coaches with no immediate sparring allowed—most importantly, have fun!"
         ],
+        "forwardingNumber": "5715290900",
+        "bookingType": "FREE_TRIAL_WALK_IN",
         "lastUpdated": 1742690074009
       }
 
