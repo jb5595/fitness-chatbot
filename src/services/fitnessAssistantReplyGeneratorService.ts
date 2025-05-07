@@ -1,14 +1,15 @@
 import { IntentDeterminationService } from "./intentDeterminationService";
 import { OpenAIChatService } from "./openAIChatService";
 import { ContextGeneratorService } from "./GymProfileContextGeneratorService";
-import { GymProfile } from "../database/helpers/gymProfile";
+// import { GymProfile } from "../database/helpers/gymProfile";
 import twilio from "twilio";
 import { addChatInteraction } from "../database/helpers/chatHistory";
 import {gymClientChatHistoryUrl} from "../helpers/frontendRoutesHelper"
+import { GymProfile } from "../models/GymProfile";
 
 interface AssistantConfig {
     systemPrompt: string;
-    gymProfile?: GymProfile;
+    gymProfile: GymProfile;
 }
 
 export class FitnessAssistantReplyGeneratorService {
@@ -34,7 +35,7 @@ export class FitnessAssistantReplyGeneratorService {
     private async getSystemPrompt(): Promise<string> {
         const contexts = [
             this.config.systemPrompt,
-            ContextGeneratorService.generateContextFromGymProfile(this.config.gymProfile)
+            ContextGeneratorService.generateContextFromGymProfile(GymProfile)
         ];
 
         return ContextGeneratorService.combineContexts(contexts);
