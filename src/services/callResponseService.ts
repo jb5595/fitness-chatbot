@@ -31,7 +31,7 @@ export class VoiceResponseService {
   private async sendTextResponse(userPhoneNumber: string, gymPhoneNumber: string): Promise<string> {
     const gymProfile: GymProfile | null = await getGymProfileByPhoneNumber(gymPhoneNumber);
     const gymName = gymProfile?.name || "Us"
-    const response = `Thanks for calling ${gymName}! How can we assist you today? Reply here.`;
+    const response = `Thanks for calling ${gymName}! How can we assist you today? Reply here. Reply STOP to opt out.`;
     await this.twilioClient.messages.create({
       body: response,
       from: this.config.twilioNumber,
