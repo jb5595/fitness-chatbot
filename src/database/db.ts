@@ -26,6 +26,7 @@ async function connectToDatabase() {
 
 async function setupDatabase(): Promise<void> {
     try {
+        
         await connectToDatabase();
         await client.db(DB_NAME).command({ ping: 1 });
         console.log("Database initialized successfully");

@@ -1,14 +1,14 @@
 import { IntentDeterminationService } from "./intentDeterminationService";
 import { OpenAIChatService } from "./openAIChatService";
 import { ContextGeneratorService } from "./GymProfileContextGeneratorService";
-import { GymProfile } from "../database/helpers/gymProfile";
+// import { GymProfile } from "../database/helpers/gymProfile";
 import twilio from "twilio";
 import { addChatInteraction } from "../database/helpers/chatHistory";
-
+import { GymProfile } from "../models/GymProfile";
 
 interface AssistantConfig {
     systemPrompt: string;
-    gymProfile?: GymProfile;
+    gymProfile: GymProfile;
 }
 
 export class FitnessAssistantReplyGeneratorService {

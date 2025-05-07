@@ -4,7 +4,7 @@ import { getGymProfileByPhoneNumber } from '../database/helpers/gymProfile';
 import twilio from "twilio";
 import { FitnessAssistantReplyGeneratorService } from '../services/fitnessAssistantReplyGeneratorService';
 import { Controller } from './Controller';
- 
+import { GymProfile } from '../models/GymProfile';
 export interface TwilioRequest extends Request {
     body: {
         Body: string;
@@ -25,7 +25,7 @@ export class MessagingController extends Controller {
         const gymPhoneNumber = req.body.To.replace(/\D/g, '');
     
         MessagingController.log(`Receiving request from: ${userPhoneNumber}, to: ${gymPhoneNumber}, content: ${userInput}`);
-        const gymProfile = await getGymProfileByPhoneNumber(gymPhoneNumber);
+        const gymProfile = await GymProfile.findOne({phoneNumber: gymPhoneNumber});
     
         const twiml = new twilio.twiml.MessagingResponse();
     
