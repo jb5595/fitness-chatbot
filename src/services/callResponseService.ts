@@ -28,28 +28,28 @@ export class VoiceResponseService {
     );
   }
 
-  private async sendTextResponse(userPhoneNumber: string, gymPhoneNumber: string): Promise<string> {
+  private async sendTextResponse(clientPhoneNumber: string, gymPhoneNumber: string): Promise<string> {
     const gymProfile: GymProfile | null = await getGymProfileByPhoneNumber(gymPhoneNumber);
     const gymName = gymProfile?.name || "Us"
     const response = `Thanks for calling ${gymName}! How can we assist you today? Reply here. Reply STOP to opt out.`;
     await this.twilioClient.messages.create({
       body: response,
       from: this.config.twilioNumber,
-      to: userPhoneNumber,
+      to: clientPhoneNumber,
     });
-    console.log(`Sent SMS to ${userPhoneNumber}: ${response}`);
+    console.log(`Sent SMS to ${clientPhoneNumber}: ${response}`);
 
-    await addChatInteraction(userPhoneNumber, gymPhoneNumber, "Requested text via call", response);
-    await addConsent(userPhoneNumber, gymPhoneNumber, `User requested text response via voice call to ${gymPhoneNumber}`);
+    await addChatInteraction(clientPhoneNumber, gymPhoneNumber, "Requested text via call", response);
+    await addConsent(clientPhoneNumber, gymPhoneNumber, `Client requested text response via voice call to ${gymPhoneNumber}`);
 
     return "We’ve sent you a text. Please reply there. Goodbye.";
   }
 
-  async generateVoiceResponse(userId: string, digit: string, toNumber: string): Promise<string> {
+  async generateVoiceResponse(clientPhoneNumber: string, digit: string, toNumber: string): Promise<string> {
     const twiml = new VoiceResponse();
 
     if (digit === "1") {
-      const voiceMessage = await this.sendTextResponse(userId, toNumber);
+      const voiceMessage = await this.sendTextResponse(clientPhoneNumber, toNumber);
       twiml.say(voiceMessage);
     } else {
       twiml.say("Invalid option. Goodbye.");
