@@ -7,6 +7,7 @@ import { ChatHistoryController } from '../../controllers/ChatHistoryController';
 
 
 const router = Router();
+
 router.get(ROUTES.CHAT_HISTORY_GYM_MESSENGERS,
     asyncHandler(ChatHistoryController.getGymMessengers as RequestHandler));
 
