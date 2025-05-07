@@ -6,6 +6,7 @@ import { GymController } from '../../controllers/GymController';
 
 
 const router = Router();
+
 router.get(ROUTES.GET_GYM,
     asyncHandler(GymController.getGym as RequestHandler));
 
