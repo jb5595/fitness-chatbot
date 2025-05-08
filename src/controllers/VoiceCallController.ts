@@ -26,14 +26,14 @@ export class VoiceCallController extends Controller {
     }
 
     public static async handleVoiceCallInput(req: TwilioRequest, res: Response){
-        const userId = req.body.From;
+        const clientNumber = req.body.From;
         const digit = req.body.Digits;
         const toNumber = req.body.To.replace(/\D/g, '');
-        VoiceCallController.log(`in voice response fromNumber ${userId}, to number: ${toNumber}, Digit ${digit}`)
+        VoiceCallController.log(`voice response clientNumber ${clientNumber}, to number: ${toNumber}, Digit ${digit}`)
         const voiceService = new VoiceResponseService({
             twilioNumber: toNumber,
         });
-        const twimlResponse = await voiceService.generateVoiceResponse(userId, digit, toNumber);
+        const twimlResponse = await voiceService.generateVoiceResponse(clientNumber, digit, toNumber);
     
         res.type("text/xml");
         res.send(twimlResponse);

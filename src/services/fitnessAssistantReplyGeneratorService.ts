@@ -42,24 +42,24 @@ export class FitnessAssistantReplyGeneratorService {
 
 
 
-    private async generateChatReply(userInput: string, userPhoneNumber: string, gymPhoneNumber: string): Promise<string> {
+    private async generateChatReply(clientInput: string, clientPhoneNumber: string, gymPhoneNumber: string): Promise<string> {
         const systemPrompt = await this.getSystemPrompt();
         const response = await this.chatService.chatWithHistory(
-            userPhoneNumber,
+            clientPhoneNumber,
             gymPhoneNumber,
             [systemPrompt],
-            [userInput]
+            [clientInput]
         );
         return response || '';
     }
 
-    async sendBookingConfirmationTextToGym(userPhoneNumber: string){
+    async sendBookingConfirmationTextToGym(clientPhoneNumber: string){
         if (!this.config.gymProfile?.forwardingNumber) {
             console.warn("No forwarding number found in gym profile. Skipping confirmation SMS.");
             return;
         }
 
-        const messageBody = `New booking at ${this.config.gymProfile.name || "the gym"}: User (${userPhoneNumber}) booked a free trial class.`;
+        const messageBody = `New booking at ${this.config.gymProfile.name || "the gym"}: Client (${clientPhoneNumber}) booked a free trial class.`;
 
         try {
             await this.twilioClient.messages.create({
@@ -72,26 +72,26 @@ export class FitnessAssistantReplyGeneratorService {
             console.error("Error sending booking confirmation SMS:", error);
         }    }
 
-    async generateReply(userInput: string, userPhoneNumber: string, gymPhoneNumber: string): Promise<string> {
+    async generateReply(clientInput: string, clientPhoneNumber: string, gymPhoneNumber: string): Promise<string> {
         try {
-            const intent = await IntentDeterminationService.determineIntent(userPhoneNumber, gymPhoneNumber, userInput);
+            const intent = await IntentDeterminationService.determineIntent(clientPhoneNumber, gymPhoneNumber, clientInput);
             console.log(`Detected intent: ${intent}`);
 
             let response: string;
              if(intent =="booking-confirmation"){
                 const systemPrompt = await this.getSystemPrompt();
-                this.sendBookingConfirmationTextToGym(userPhoneNumber)
-                response = await this.chatService.reWriteMessageBasedOnContext(userPhoneNumber, gymPhoneNumber, 
+                this.sendBookingConfirmationTextToGym(clientPhoneNumber)
+                response = await this.chatService.reWriteMessageBasedOnContext(clientPhoneNumber, gymPhoneNumber, 
                     FitnessAssistantReplyGeneratorService.DEFAULT_BOOKING_CONFIRMATION,
                     [systemPrompt])
             }
             else {
                 console.log("generarting chat reply")
-                response = await this.generateChatReply(userInput, userPhoneNumber, gymPhoneNumber);
+                response = await this.generateChatReply(clientInput, clientPhoneNumber, gymPhoneNumber);
             }
             console.log("generated response");
 
-            await addChatInteraction(userPhoneNumber, gymPhoneNumber, userInput, response || '');
+            await addChatInteraction(clientPhoneNumber, gymPhoneNumber, clientInput, response || '');
 
             return response;
         } catch (error) {
