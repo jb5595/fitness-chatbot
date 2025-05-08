@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { extractPhoneNumber } from '../database/helpers/extractPhoneNumber';
+import { extractPhoneNumber } from '../helpers/extractPhoneNumber';
 import { getGymProfileByPhoneNumber } from '../database/helpers/gymProfile';
 import twilio from "twilio";
 import { FitnessAssistantReplyGeneratorService } from '../services/fitnessAssistantReplyGeneratorService';
@@ -22,7 +22,7 @@ export class MessagingController extends Controller {
     public static async handleIncomingSMS(req: TwilioRequest, res: Response){
         const clientInput = req.body.Body;
         const clientPhoneNumber = extractPhoneNumber(req.body.From);
-        const gymPhoneNumber = req.body.To.replace(/\D/g, '');
+        const gymPhoneNumber = extractPhoneNumber(req.body.To); 
     
         MessagingController.log(`Receiving request from: ${clientPhoneNumber}, to: ${gymPhoneNumber}, content: ${clientInput}`);
         const gymProfile = await getGymProfileByPhoneNumber(gymPhoneNumber);
