@@ -13,10 +13,10 @@ export class IntentDeterminationService {
     2. For "booking-confirmation", the user must provide their full name and a preferred class time (not necessarily in the same message). If the current message provides one piece and the other was provided earlier, classify as "booking-confirmation".
     3. Return only the intent in lowercase with no quotes (e.g., general-question, booking-confirmation).`;
 
-    static async determineIntent(userPhoneNumber: string, gymPhoneNumber: string, customerMessage: string): Promise<Intent> {
+    static async determineIntent(clientPhoneNumber: string, gymPhoneNumber: string, customerMessage: string): Promise<Intent> {
         const chatService = new OpenAIChatService();
         const response = await chatService.chatWithHistory(
-            userPhoneNumber,
+            clientPhoneNumber,
             gymPhoneNumber,
             [this.INTENT_PROMPT],
             [customerMessage]

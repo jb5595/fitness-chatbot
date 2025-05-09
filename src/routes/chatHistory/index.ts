@@ -7,11 +7,11 @@ import { ChatHistoryController } from '../../controllers/ChatHistoryController';
 
 
 const router = Router();
-router.get(ROUTES.CHAT_HISTORY_GYM_MESSENGERS,
-    asyncHandler(ChatHistoryController.getGymMessengers as RequestHandler));
+router.get(ROUTES.CHAT_HISTORY_GYM_CLIENTS,
+    asyncHandler(ChatHistoryController.getGymClients as RequestHandler));
 
-router.get(ROUTES.CHAT_HISTORY_GYM_MESSENGER_MESSAGES,
-    asyncHandler(ChatHistoryController.getGymMessengerMessages as RequestHandler));
+router.get(ROUTES.CHAT_HISTORY_GYM_CLIENT_MESSAGES,
+    asyncHandler(ChatHistoryController.getGymClientMessages as RequestHandler));
 
 
 export default router;

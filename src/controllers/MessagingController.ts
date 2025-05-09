@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { extractPhoneNumber } from '../database/helpers/extractPhoneNumber';
+import { extractPhoneNumber } from '../helpers/extractPhoneNumber';
 import { getGymProfileByPhoneNumber } from '../database/helpers/gymProfile';
 import twilio from "twilio";
 import { FitnessAssistantReplyGeneratorService } from '../services/fitnessAssistantReplyGeneratorService';
@@ -20,12 +20,13 @@ export class MessagingController extends Controller {
     private static GYM_NOT_SETUP_RESPONSE = "Sorry, you're trying to message a gym that's not set up."
     
     public static async handleIncomingSMS(req: TwilioRequest, res: Response){
-        const userInput = req.body.Body;
-        const userPhoneNumber = extractPhoneNumber(req.body.From);
-        const gymPhoneNumber = req.body.To.replace(/\D/g, '');
+        const clientInput = req.body.Body;
+        const clientPhoneNumber = extractPhoneNumber(req.body.From);
+        const gymPhoneNumber = extractPhoneNumber(req.body.To); 
     
         MessagingController.log(`Receiving request from: ${userPhoneNumber}, to: ${gymPhoneNumber}, content: ${userInput}`);
         const gymProfile = await GymProfile.findOne({phoneNumber: gymPhoneNumber});
+
     
         const twiml = new twilio.twiml.MessagingResponse();
     
@@ -39,7 +40,7 @@ export class MessagingController extends Controller {
         const replyGenerator = new FitnessAssistantReplyGeneratorService({
             gymProfile: gymProfile
         });
-        const response = await replyGenerator.generateReply(userInput, userPhoneNumber, gymPhoneNumber);
+        const response = await replyGenerator.generateReply(clientInput, clientPhoneNumber, gymPhoneNumber);
         MessagingController.log("Sending response");
         twiml.message(response);
         res.type("text/xml");
