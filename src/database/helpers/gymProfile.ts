@@ -24,6 +24,7 @@ export interface GymProfile {
     scheduleInfo?: string;
     bookingType?: BookingType;
     freeTrialSchedule?: FreeTrialSchedule;
+    voiceForwardingNumber: string;
     forwardingNumber?: string
     calendlyLink?: string;
     pricing: string;
@@ -85,8 +86,10 @@ export async function initializeDefaultGymProfile(): Promise<void> {
           "For free trial classes please arrive 20 minutes early to check class capacity, sign a safety waiver, and get your hands wrapped and warmed up, as late arrivals must wait for the next free trial class; bring water and workout clothing, and note that previous experience will be assessed by coaches with no immediate sparring allowed—most importantly, have fun!"
         ],
         "forwardingNumber": "5715290900",
+        "voiceForwardingNumber": "5715290900",
         "bookingType": "FREE_TRIAL_WALK_IN",
         "lastUpdated": 1742690074009
+
       }
 
     await createGymProfile( topeiraProfle);
