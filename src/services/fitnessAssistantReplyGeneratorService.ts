@@ -4,7 +4,7 @@ import { ContextGeneratorService } from "./GymProfileContextGeneratorService";
 import { GymProfile } from "../database/helpers/gymProfile";
 import twilio from "twilio";
 import { addChatInteraction } from "../database/helpers/chatHistory";
-
+import {gymClientChatHistoryUrl} from "../helpers/frontendRoutesHelper"
 
 interface AssistantConfig {
     systemPrompt: string;
@@ -59,7 +59,7 @@ export class FitnessAssistantReplyGeneratorService {
             return;
         }
 
-        const messageBody = `New booking at ${this.config.gymProfile.name || "the gym"}: Client (${clientPhoneNumber}) booked a free trial class.`;
+        const messageBody = `New booking at ${this.config.gymProfile.name || "the gym"}: Client (${clientPhoneNumber}) booked a free trial class. See chat history: ${gymClientChatHistoryUrl(this.config.gymProfile.phoneNumber, clientPhoneNumber)}`;
 
         try {
             await this.twilioClient.messages.create({
@@ -76,7 +76,6 @@ export class FitnessAssistantReplyGeneratorService {
         try {
             const intent = await IntentDeterminationService.determineIntent(clientPhoneNumber, gymPhoneNumber, clientInput);
             console.log(`Detected intent: ${intent}`);
-
             let response: string;
              if(intent =="booking-confirmation"){
                 const systemPrompt = await this.getSystemPrompt();
