@@ -6,9 +6,32 @@ export class GymController extends Controller {
     public static async getGym(req: Request, res: Response){
         const phoneNumber = req.params.gymPhoneNumber.toString()
         GymController.log(`Getting GymProfile for ${phoneNumber}`)
-        const gym = await GymProfile.findOne({phoneNumber})
-        
+        const gym = await GymProfile.findOne(
+                {phoneNumber: phoneNumber}
+            );
         res.type("text/json");
         res.send(JSON.stringify(gym))
+    }
+
+    public static async createGym(req: Request, res: Response){
+        const gym = await GymProfile.create(req.body)
+        GymController.log(`Creating new GymProfile. ID: ${gym._id}`)
+        res.status(200).send('Gym successfully created');
+    }
+
+    public static async updateGym(req: Request, res: Response){
+        const gymId = req.params.gymId.toString()
+        const gym = await GymProfile.updateOne(
+            { _id: gymId },
+            { 
+                $set: {
+                    ...req.body,
+                    lastUpdated: Date.now()
+                }
+            },
+            { upsert: true }
+        );
+        GymController.log(`Updating new GymProfile. ID: ${gymId}`)
+        res.status(200).send('Gym successfully updated');
     }
 }

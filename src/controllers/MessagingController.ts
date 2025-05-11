@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import { extractPhoneNumber } from '../helpers/extractPhoneNumber';
-import { getGymProfileByPhoneNumber } from '../database/helpers/gymProfile';
 import twilio from "twilio";
 import { FitnessAssistantReplyGeneratorService } from '../services/fitnessAssistantReplyGeneratorService';
 import { Controller } from './Controller';
