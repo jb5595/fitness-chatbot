@@ -8,16 +8,11 @@ dotenv.config();
 // Start the app with database setup
 async function startApp(): Promise<void> {
     try {
-        // await setupDatabase();
-        await mongoose.connect(
-            process.env.MONGODB_URI
-          );
-        
-
+        await setupDatabase();
         // Add graceful shutdown
         process.on('SIGINT', async () => {
             console.log('Shutting down gracefully...');
-            // await closeDatabase();
+            await closeDatabase();
             process.exit(0);
         });
 

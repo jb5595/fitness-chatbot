@@ -21,7 +21,8 @@ export class GymController extends Controller {
 
     public static async updateGym(req: Request, res: Response){
         const gymId = req.params.gymId.toString()
-        await GymProfile.updateOne(
+        GymController.log(`Updating GymProfile. ID: ${gymId}`)
+        const gym = await GymProfile.updateOne(
             { _id: gymId },
             { 
                 $set: {
@@ -31,7 +32,6 @@ export class GymController extends Controller {
             },
             { upsert: true }
         );
-        GymController.log(`Updating new GymProfile. ID: ${gymId}`)
-        res.status(200).send('Gym successfully updated');
+        res.status(200).send(JSON.stringify(gym));
     }
 }

@@ -32,7 +32,7 @@ const ChatHistorySchema = new mongoose.Schema<ChatHistory>({
         required: true,
     }
 },
-{ collection: 'chat_history'});
+{ collection: 'chatHistory'});
 
 export async function getFormattedChatHistoryByClientPhoneNumber(clientPhoneNumber: string, gymPhoneNumber: string): Promise<string> {
     const history = await ChatHistory.find({clientPhoneNumber, gymPhoneNumber})
@@ -41,4 +41,4 @@ export async function getFormattedChatHistoryByClientPhoneNumber(clientPhoneNumb
         .join("\n");
 }
 
-export const ChatHistory = mongoose.model("ChatHisory", ChatHistorySchema);
+export const ChatHistory = mongoose.model("ChatHistory", ChatHistorySchema);
