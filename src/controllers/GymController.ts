@@ -21,7 +21,7 @@ export class GymController extends Controller {
 
     public static async updateGym(req: Request, res: Response){
         const gymId = req.params.gymId.toString()
-        const gym = await GymProfile.updateOne(
+        await GymProfile.updateOne(
             { _id: gymId },
             { 
                 $set: {
