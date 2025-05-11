@@ -2,9 +2,9 @@ import { IntentDeterminationService } from "./intentDeterminationService";
 import { OpenAIChatService } from "./openAIChatService";
 import { ContextGeneratorService } from "./GymProfileContextGeneratorService";
 import twilio from "twilio";
-import { addChatInteraction } from "../database/helpers/chatHistory";
 import {gymClientChatHistoryUrl} from "../helpers/frontendRoutesHelper"
 import { GymProfile } from "../models/GymProfile";
+import { ChatHistory } from "../models/ChatHistory";
 
 interface AssistantConfig {
     systemPrompt: string;
@@ -90,7 +90,13 @@ export class FitnessAssistantReplyGeneratorService {
             }
             console.log("generated response");
 
-            await addChatInteraction(clientPhoneNumber, gymPhoneNumber, clientInput, response || '');
+            await ChatHistory.insertOne({
+                clientPhoneNumber,
+                gymPhoneNumber,
+                clientMessage: clientInput,
+                assistantResponse: response,
+                timestamp: Date.now()
+            });
 
             return response;
         } catch (error) {
