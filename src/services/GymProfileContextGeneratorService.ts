@@ -1,4 +1,4 @@
-import { FreeTrialSchedule, GymProfile } from "../database/helpers/gymProfile";
+import { FreeTrialSchedule, GymProfile } from "../models/GymProfile";
 import { BookingType } from "../types/bookingTypes";
 
 export class ContextGeneratorService {

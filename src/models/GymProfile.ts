@@ -20,6 +20,7 @@ export interface GymProfile {
     scheduleInfo?: string;
     bookingType?: BookingType;
     freeTrialSchedule?: FreeTrialSchedule;
+    voiceForwardingNumber: string;
     forwardingNumber?: string
     calendlyLink?: string;
     pricing: string;
@@ -60,6 +61,10 @@ const GymProfileSchema = new mongoose.Schema<GymProfile>({
             saturday: [String]
         },
         required: false
+    },
+    voiceForwardingNumber: {
+        type: String,
+        required: true,
     },
     forwardingNumber: {
         type: String,

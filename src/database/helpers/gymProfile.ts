@@ -1,39 +1,7 @@
 import { client, connectToDatabase, DB_NAME } from "../db";
-import { BookingType } from "../../types/bookingTypes";
-import { FreeTrialSchedule } from "../../models/GymProfile";
+import { GymProfile } from "../../models/GymProfile";
 
 const COLLECTION_NAME= 'gymProfiles'
-
-// //I.e. Has free trials monday and wednsday at 7pm
-// // monday => ["19:00"]
-// // wednesday => ["19:00"]
-// export type FreeTrialSchedule = {
-//     sunday?: string[]
-//     monday?: string[]
-//     tuesday?: string[]
-//     wednesday?: string[]
-//     thursday?: string[]
-//     friday?: string[]
-//     saturday?: string[]
-// }
-
-export interface GymProfile {
-    _id?: string;  // MongoDB ID
-    name: string;
-    phoneNumber: string
-    description?: string;
-    scheduleInfo?: string;
-    bookingType?: BookingType;
-    freeTrialSchedule?: FreeTrialSchedule;
-    voiceForwardingNumber: string;
-    forwardingNumber?: string
-    calendlyLink?: string;
-    pricing: string;
-    websiteData?: { [url: string]: string };
-    additionalInfo: string[];
-    lastUpdated: number;
-}// Gym Profile Management
-
 
 export async function updateGymProfile(
     gymId: string,
