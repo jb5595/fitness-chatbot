@@ -1,10 +1,9 @@
 // services/callResponseService.ts
 import twilio from "twilio";
-
 import { addConsent } from "../database/helpers/consents";
-import { getGymProfileByPhoneNumber, GymProfile } from "../database/helpers/gymProfile";
-import { addChatInteraction } from "../database/helpers/chatHistory";
 import VoiceResponse from "twilio/lib/twiml/VoiceResponse.js";
+import { GymProfile } from "../models/GymProfile";
+import { ChatHistory } from "../models/ChatHistory";
 
 interface VoiceResponseConfig {
   twilioNumber: string;
@@ -29,7 +28,9 @@ export class VoiceResponseService {
   }
 
   private async sendTextResponse(clientPhoneNumber: string, gymPhoneNumber: string): Promise<string> {
-    const gymProfile: GymProfile | null = await getGymProfileByPhoneNumber(gymPhoneNumber);
+    const gymProfile = await GymProfile.findOne(
+        {phoneNumber: gymPhoneNumber}
+    );
     const gymName = gymProfile?.name || "Us"
     const response = `Thanks for calling ${gymName}! How can we assist you today? Reply here. Reply STOP to opt out.`;
     await this.twilioClient.messages.create({
@@ -39,7 +40,13 @@ export class VoiceResponseService {
     });
     console.log(`Sent SMS to ${clientPhoneNumber}: ${response}`);
 
-    await addChatInteraction(clientPhoneNumber, gymPhoneNumber, "Requested text via call", response);
+    await ChatHistory.insertOne({
+        clientPhoneNumber,
+        gymPhoneNumber,
+        clientMessage: "Requested text via call",
+        assistantResponse: response,
+        timestamp: Date.now()
+    });
     await addConsent(clientPhoneNumber, gymPhoneNumber, `Client requested text response via voice call to ${gymPhoneNumber}`);
 
     return "We’ve sent you a text. Please reply there. Goodbye.";

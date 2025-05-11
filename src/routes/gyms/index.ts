@@ -9,5 +9,9 @@ const router = Router();
 
 router.get(ROUTES.GET_GYM,
     asyncHandler(GymController.getGym as RequestHandler));
+router.post(ROUTES.CREATE_GYM,
+    asyncHandler(GymController.createGym as RequestHandler));
+router.patch(ROUTES.UPDATE_GYM,
+    asyncHandler(GymController.updateGym as RequestHandler));
 
 export default router;

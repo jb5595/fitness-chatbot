@@ -1,10 +1,9 @@
 import { Request, Response } from 'express';
 import { extractPhoneNumber } from '../helpers/extractPhoneNumber';
-import { getGymProfileByPhoneNumber } from '../database/helpers/gymProfile';
 import twilio from "twilio";
 import { FitnessAssistantReplyGeneratorService } from '../services/fitnessAssistantReplyGeneratorService';
 import { Controller } from './Controller';
- 
+import { GymProfile } from '../models/GymProfile';
 export interface TwilioRequest extends Request {
     body: {
         Body: string;
@@ -25,7 +24,7 @@ export class MessagingController extends Controller {
         const gymPhoneNumber = extractPhoneNumber(req.body.To); 
     
         MessagingController.log(`Receiving request from: ${clientPhoneNumber}, to: ${gymPhoneNumber}, content: ${clientInput}`);
-        const gymProfile = await getGymProfileByPhoneNumber(gymPhoneNumber);
+        const gymProfile = await GymProfile.findOne({phoneNumber: gymPhoneNumber});
     
         const twiml = new twilio.twiml.MessagingResponse();
     

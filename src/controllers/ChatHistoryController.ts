@@ -1,11 +1,14 @@
-import {  getFormattedChatHistoryByClientPhoneNumber, getClientPhoneNumbersByGym } from "../database/helpers/chatHistory";
+import { ChatHistory, getFormattedChatHistoryByClientPhoneNumber } from "../models/ChatHistory";
 import { Controller } from "./Controller";
 import  { Request, Response } from "express";
 
 export class ChatHistoryController extends Controller{
     
     public static async getGymClients(req: Request, res: Response){
-        const clientList = await getClientPhoneNumbersByGym(req.params.gymPhoneNumber)
+        const gymPhoneNumber = req.params.gymPhoneNumber
+         const clientList = await ChatHistory
+              .find({ gymPhoneNumber: gymPhoneNumber }).distinct("clientPhoneNumber");
+
         res.type("text/json");
         res.send(JSON.stringify(clientList))
     }

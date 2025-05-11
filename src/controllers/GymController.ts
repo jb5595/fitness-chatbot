@@ -1,12 +1,37 @@
-import { getGymProfileByPhoneNumber } from "../database/helpers/gymProfile";
 import { Controller } from "./Controller";
 import  { Request, Response } from "express";
-
+import { GymProfile } from "../models/GymProfile";
 export class GymController extends Controller {
 
     public static async getGym(req: Request, res: Response){
-        const gym = await getGymProfileByPhoneNumber(req.params.gymPhoneNumber)
+        const phoneNumber = req.params.gymPhoneNumber.toString()
+        GymController.log(`Getting GymProfile for ${phoneNumber}`)
+        const gym = await GymProfile.findOne(
+                {phoneNumber: phoneNumber}
+            );
         res.type("text/json");
         res.send(JSON.stringify(gym))
+    }
+
+    public static async createGym(req: Request, res: Response){
+        const gym = await GymProfile.create(req.body)
+        GymController.log(`Creating new GymProfile. ID: ${gym._id}`)
+        res.status(200).send('Gym successfully created');
+    }
+
+    public static async updateGym(req: Request, res: Response){
+        const gymId = req.params.gymId.toString()
+        GymController.log(`Updating GymProfile. ID: ${gymId}`)
+        const gym = await GymProfile.updateOne(
+            { _id: gymId },
+            { 
+                $set: {
+                    ...req.body,
+                    lastUpdated: Date.now()
+                }
+            },
+            { upsert: true }
+        );
+        res.status(200).send(JSON.stringify(gym));
     }
 }

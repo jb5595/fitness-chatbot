@@ -1,12 +1,14 @@
 import { closeDatabase, setupDatabase } from './database/db';
 import app from "./app";
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
 
+dotenv.config();
 
 // Start the app with database setup
 async function startApp(): Promise<void> {
     try {
         await setupDatabase();
-
         // Add graceful shutdown
         process.on('SIGINT', async () => {
             console.log('Shutting down gracefully...');

@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 import dotenv from "dotenv";
-import {  getFormattedChatHistoryByClientPhoneNumber } from "../database/helpers/chatHistory";
+import { getFormattedChatHistoryByClientPhoneNumber } from "../models/ChatHistory";
 
 
 dotenv.config();

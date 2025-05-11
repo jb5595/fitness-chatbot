@@ -3,8 +3,8 @@ import {  Response } from "express";
 import { Controller } from "./Controller";
 import { TwilioRequest } from "./MessagingController";
 import { VoiceResponseService } from "../services/callResponseService";
-import { getGymProfileByPhoneNumber } from "../database/helpers/gymProfile";
 import { extractPhoneNumber } from "../helpers/extractPhoneNumber";
+import { GymProfile } from "../models/GymProfile";
 
 export class VoiceCallController extends Controller {
     private static GYM_NOT_SETUP_RESPONSE = "Sorry, you're trying to call a gym that's not set up.";
@@ -21,7 +21,9 @@ export class VoiceCallController extends Controller {
             timeout: 5,
         });
 
-        const gymProfile = await getGymProfileByPhoneNumber(gymPhoneNumber);
+        const gymProfile = await GymProfile.findOne(
+                {phoneNumber: gymPhoneNumber}
+            );
 
         if (!gymProfile) {
             VoiceCallController.log("Gym profile not found, returning gym not setup response.");
@@ -47,7 +49,10 @@ export class VoiceCallController extends Controller {
         VoiceCallController.log(`Voice response clientNumber ${clientNumber}, to number: ${gymPhoneNumber}, Digit ${keypadInput}`);
 
         const twiml = new VoiceResponse();
-        const gymProfile = await getGymProfileByPhoneNumber(gymPhoneNumber);
+        
+        const gymProfile = await GymProfile.findOne(
+            {phoneNumber: gymPhoneNumber}
+        );
 
         if (!gymProfile) {
             VoiceCallController.log("Gym profile not found, returning gym not setup response.");
