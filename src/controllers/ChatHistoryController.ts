@@ -7,12 +7,10 @@ export class ChatHistoryController extends Controller{
     public static async getGymClients(req: Request, res: Response){
         const gymPhoneNumber = req.params.gymPhoneNumber
          const clientList = await ChatHistory
-              .find({ gymPhoneNumber: gymPhoneNumber }).select({ "clientPhoneNumber": 1, "_id": 0});
-        // Extract clientPhoneNumber from each document
-        const clientPhoneNumbers = clientList.map(doc => doc.clientPhoneNumber).filter((value, index, array) => array.indexOf(value) === index);
+              .find({ gymPhoneNumber: gymPhoneNumber }).distinct("clientPhoneNumber");
 
         res.type("text/json");
-        res.send(JSON.stringify(clientPhoneNumbers))
+        res.send(JSON.stringify(clientList))
     }
 
     public static async getGymClientMessages(req: Request, res: Response){
