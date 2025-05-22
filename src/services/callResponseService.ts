@@ -1,9 +1,9 @@
 // services/callResponseService.ts
 import twilio from "twilio";
-import { addConsent } from "../database/helpers/consents";
 import VoiceResponse from "twilio/lib/twiml/VoiceResponse.js";
 import { GymProfile } from "../models/GymProfile";
 import { ChatHistory } from "../models/ChatHistory";
+import { Consent } from "../models/Consent";
 
 interface VoiceResponseConfig {
   twilioNumber: string;
@@ -47,7 +47,14 @@ export class VoiceResponseService {
         assistantResponse: response,
         timestamp: Date.now()
     });
-    await addConsent(clientPhoneNumber, gymPhoneNumber, `Client requested text response via voice call to ${gymPhoneNumber}`);
+
+    await Consent.insertOne({
+      clientPhoneNumber,
+      gymPhoneNumber,
+      type: "text_consent",
+      timestamp: Date.now(),
+      message: `Client requested text response via voice call to ${gymPhoneNumber}`
+    });
 
     return "We’ve sent you a text. Please reply there. Goodbye.";
   }
