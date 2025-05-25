@@ -1,4 +1,4 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema, Model } from "mongoose";
 import { GymProfile } from "./GymProfile";
     
     
@@ -12,9 +12,10 @@ import { GymProfile } from "./GymProfile";
         gym?: GymProfile;
         tokens?: {};
         lastUpdated: number;
+        isAdmin: boolean
     }
     
-    const UserSchema = new mongoose.Schema<User>({
+    const UserSchema = new Schema<User>({
         firstName: {
             type: String,
             required: false,
@@ -30,6 +31,11 @@ import { GymProfile } from "./GymProfile";
         email: {
             type: String,
             required: true,
+            unique: true,
+            validate: {
+                validator: async (email: string): Promise<boolean> => await validateUniqueEmail(email),
+                message: 'User with email already exists'
+            }
         },
         password: {
             type: String,
@@ -43,12 +49,16 @@ import { GymProfile } from "./GymProfile";
             type: Schema.Types.ObjectId,
             ref: "RefreshTokens"
         }],
-        lastUpdated: {
-            type: Number,
-            required: true,
+        isAdmin: {
+            type: Boolean,
+            default: false
         }
     },
     { collection: 'users'});
     
     
-    export const ChatHistory = mongoose.model("User", UserSchema);
+    export const User: Model<User> = mongoose.model<User>("User", UserSchema);
+
+    const validateUniqueEmail = async (email: string): Promise<boolean> => {
+        return !(await User.exists({ email }));
+    }

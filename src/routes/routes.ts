@@ -6,5 +6,11 @@ export enum ROUTES {
     CREATE_GYM = "/gym",
     UPDATE_GYM = "/gym/:gymId",
     CHAT_HISTORY_GYM_CLIENTS = "/chat-history/gym/:gymPhoneNumber/clients",
-    CHAT_HISTORY_GYM_CLIENT_MESSAGES = '/chat-history/gym/:gymPhoneNumber/chats/:clientPhoneNumber'
+    CHAT_HISTORY_GYM_CLIENT_MESSAGES = '/chat-history/gym/:gymPhoneNumber/chats/:clientPhoneNumber',
+    SIGNUP = '/signup',
+    LOGIN = '/login',
+    ME = '/users/me',
+    TOKEN = '/token',
+    LOGOUT = '/logout',
+
 }
