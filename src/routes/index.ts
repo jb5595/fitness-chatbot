@@ -1,15 +1,18 @@
 import { Router } from 'express';
-import messaging from './messaging';
-import voiceCalls from "./voiceCalls"
-import gyms from "./gyms"
-import chatHistory from "./chatHistory"
-
+import messagingRoutes from './messaging';
+import voiceCallRoutes from "./voiceCalls"
+import gymRoutes from "./gyms"
+import chatHistoryRoutes from "./chatHistory"
+import authRoutes from "./auth"
+import userRoutes from "./user"
 const router = Router();
 
 
-router.use(voiceCalls)
-router.use(messaging);
-router.use(gyms)
-router.use(chatHistory)
+router.use(voiceCallRoutes)
+router.use(messagingRoutes);
+router.use(gymRoutes)
+router.use(chatHistoryRoutes)
+router.use(authRoutes)
+router.use(userRoutes)
 
 export default router;
